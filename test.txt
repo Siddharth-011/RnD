@@ -1,0 +1,23 @@
+a = 10
+
+
+     
+b = 10 + 20 
+
+  
+
+c = a * b
+  
+  
+d = a[12]
+c = *a   
+     
+d = &a
+
+goto 13
+
+if a<b goto 20
+
+read a
+
+if b goto 12
