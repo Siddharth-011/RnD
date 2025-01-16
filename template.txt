@@ -1,0 +1,18 @@
+structlist:
+<LIST OF STRUCT NAMES>
+
+structs:
+<STRUCT NAME> {
+    <FIELDS>
+}
+
+vars:
+<TYPE> <VAR NAME>
+
+funcs:
+<FUNCTION NAME> {
+    <CODE>
+}
+
+code:
+<MAIN CODE>

@@ -57,42 +57,27 @@ def p_bool_exp(p):
     else:
         # print("NEQ")
         p[0] = ['NEQ', p[1], p[4]]
-    
-def p_arth_exp(p):
-    '''arthexp : elem "+" elem
-               | elem "-" elem
-               | elem "/" elem
-               | elem "*" elem'''
-    if p[2] == '+':
-        # print("ADD")
-        p[0] = ['ADD', p[1], p[3]]
-    elif p[2] == '-':
-        # print("SUB")
-        p[0] = ['SUB', p[1], p[3]]
-    elif p[2] == '/':
-        # print("DIV")
-        p[0] = ['DIV', p[1], p[3]]
-    else:
-        # print("MULT")
-        p[0] = ['MULT', p[1], p[3]]
 
 def p_lhs(p):
     '''lhs : space var space
            | space "*" var space
-           | space var "[" elem "]" space'''
+           | space var "-" ">" var space
+           | space var "." var space'''
     if p[2] == '*':
         # print("PTR")
         p[0] = ['PTR', p[3]]
-    elif p[3] == '[':
-        # print("ARR")
-        p[0] = ['ARR', p[2], p[4]]
+    elif p[3] == '-':
+        # print("FLP")
+        p[0] = ['FLP', p[2], p[5]]
+    elif p[3] == '.':
+        # print("FLD")
+        p[0] = ['FLD', p[2], p[4]]
     else:
         # print("VAR")
         p[0] = p[2]
     
 def p_rhs(p):
     '''rhs : boolexp
-           | arthexp
            | lhs
            | space "&" var space
            | space NUMBER space'''
@@ -142,6 +127,8 @@ def p_tac_nl(p):
     lno += p[2]
     for _ in range(p[2]):
         lnomap.append(alno)
+
+# def p_
 
 def p_error(p):
     if p:

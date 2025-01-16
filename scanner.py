@@ -5,29 +5,34 @@ reserved  = {
     'if' : 'IF',
     'goto' : 'GOTO',
     'read' : 'READ',
+    'structlist:' : 'STLT',
+    'structs:' : 'STRT',
+    'vars:' : 'VARS',
+    'funcs:' : 'FUNCS',
+    'code:' : 'CODE'
 }
 tokens = ['VARNAME', 'TMPVARNAME', 'NUMBER', 'SPACES', 'NEWLINE', 'LTE', 'GTE'] + list(reserved.values())
 
-literals = ['=', '+', '-', '*', '/', '[', ']', '!', '&', '<', '>']
+literals = ['=', '*', '!', '&', '<', '>', '{', '}', '-', '.']
 
 # t_VARNAME = r'[a-zA-Z]+'
 # t_TMPVARNAME = r't[0-9]+'
 
 def t_TMPVARNAME(t):
     r't[0-9]+'
-    t.value = ['temp', str(t.value)]
+    t.value = ['TMP', str(t.value)]
     return t
 
 def t_VARNAME(t):
     r'[a-zA-Z]+'
     t.type = reserved.get(t.value,'VARNAME')
     if t.type == 'VARNAME':
-        t.value = ['var', str(t.value)]
+        t.value = ['VAR', str(t.value)]
     return t
 
 def t_NUMBER(t):
     r'\d+(\.[\d]+)?'
-    t.value = ['num', int(t.value)]
+    t.value = ['NUM', int(t.value)]
     return t
 
 def t_NEWLINE(t):
