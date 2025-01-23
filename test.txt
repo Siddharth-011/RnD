@@ -1,3 +1,26 @@
+
+structlist = {sta, stb
+   ,stc,
+    std}
+
+varlist = { scalar : {a, b, c},
+            sta* : {a, b, c, d}
+          }
+
+funclist = {funca, funcb}
+
+structs:
+sta{
+    scalar : {a, b, c},
+    scalar* : {d, e, f}
+}
+
+funcs:
+funca{
+    a = b
+    b = c
+}
+
 code:
 a = &d
 

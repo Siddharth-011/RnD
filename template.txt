@@ -1,13 +1,17 @@
 structlist:
 <LIST OF STRUCT NAMES>
 
+varlist:
+<LIST OF VARIABLES AND THEIR TYPES>
+(<TYPE> <LIST OF VARIABLES>)
+
+funclist:
+<LIST OF FUNCTIONS>
+
 structs:
 <STRUCT NAME> {
     <FIELDS>
 }
-
-vars:
-<TYPE> <VAR NAME>
 
 funcs:
 <FUNCTION NAME> {

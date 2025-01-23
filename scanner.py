@@ -5,15 +5,16 @@ reserved  = {
     'if' : 'IF',
     'goto' : 'GOTO',
     'read' : 'READ',
-    'structlist:' : 'STLT',
-    'structs:' : 'STRT',
-    'vars:' : 'VARS',
-    'funcs:' : 'FUNCS',
-    'code:' : 'CODE'
+    'structlist' : 'STLT',
+    'varlist' : 'VARLT',
+    'funclist' : 'FNLT',
+    'structs' : 'STRT',
+    'funcs' : 'FUNCS',
+    'code' : 'CODE'
 }
 tokens = ['VARNAME', 'TMPVARNAME', 'NUMBER', 'SPACES', 'NEWLINE', 'LTE', 'GTE'] + list(reserved.values())
 
-literals = ['=', '*', '!', '&', '<', '>', '{', '}', '-', '.']
+literals = ['=', '*', '!', '&', '<', '>', '{', '}', '-', '.', ':', ',']
 
 # t_VARNAME = r'[a-zA-Z]+'
 # t_TMPVARNAME = r't[0-9]+'

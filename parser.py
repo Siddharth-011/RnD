@@ -2,20 +2,24 @@ import ply.yacc as yacc
 from scanner import tokens
 
 # precedence = (
-#     ('left', '+', '-'),
-#     ('left', '*', '/'),
-#     ('right', 'UMINUS'),
+#     ('right', 'LVL1'),
+#     ('right', 'LVL2'),
+#     ('right', 'LVL3'),
+#     # ('left', ':'),
 # )
 
 #TODO
 # list of statements
 statements = []
 lnomap = [0,]
+structlist = []
+funclist = []
+tpyes = ['scalar']
 
 lno = 1
 alno = 1
 
-start = "tac"
+start = "prog"
 
 def p_space(p):
     '''space :
@@ -110,16 +114,16 @@ def p_stmt(p):
     alno += 1
     
 def p_tac(p):
-    '''tac : space
-           | stmt
+    '''tac : CODE ":"
            | tacnl stmt'''
-    if len(p) == 3:
+    if p[2] != ':':
         print(lno, p[2])
         statements.append(p[2])
-    elif p[1] != '':
-        print(lno, p[1])
-        lnomap.append(0)
-        statements.append(p[1])
+    # | stmt
+    # elif p[1] != '':
+    #     # print(lno, p[1])
+    #     lnomap.append(0)
+    #     statements.append(p[1])
 
 def p_tac_nl(p):
     r'tacnl : tac NEWLINE'
@@ -128,11 +132,79 @@ def p_tac_nl(p):
     for _ in range(p[2]):
         lnomap.append(alno)
 
-# def p_
+def p_nl(p):
+    r'nl : NEWLINE'
+    global lno
+    lno += p[1]
+
+def p_funcbody(p):
+    '''funcbody :
+                | funcbody nl stmt'''
+    # if p[2] != ':':
+    #     print(lno, p[2])
+    #     statements.append(p[2])
+
+def p_func(p):
+    '''func : FUNCS ":" nl
+            | func VARNAME "{" funcbody spnl "}" nl'''
+
+def p_space_nl(p):
+    '''spnl : space
+            | nl'''
+
+def p_list(p):
+    '''list : VARNAME
+            | list spnl "," spnl VARNAME'''
+    if len(p) == 2:
+        p[0] = [p[1][1],]
+    else:
+        p[0] = p[1]
+        p[0].append(p[5][1])
+
+def p_dec_list(p):
+    '''declist : VARNAME space ":" space "{" spnl list spnl "}"
+               | VARNAME "*" space ":" space "{" spnl list spnl "}"
+               | declist spnl "," spnl VARNAME space ":" space "{" spnl list spnl "}"
+               | declist spnl "," spnl VARNAME "*" space ":" space "{" spnl list spnl "}"'''
+    # if len(p) == 4:
+    #     print(p[2], p[3])
+    # else:
+    #     print(p[3], p[4])
+
+def p_lists(p):
+    '''structlist : spnl STLT space "=" space "{" spnl "}"
+                  | spnl STLT space "=" space "{" spnl list spnl "}"
+       varlist : nl VARLT space "=" space "{" spnl "}"
+               | nl VARLT space "=" space "{" spnl declist spnl "}"
+       funclist : nl FNLT space "=" space "{" spnl "}"
+                | nl FNLT space "=" space "{" spnl list spnl "}"'''
+    # if len(p) == 5:
+    #     # structlist = p[4]
+    #     print(p[4])
+
+# def p_lists(p):
+#     '''structlist : spnl STLT ":"
+#                   | spnl STLT ":" nl list
+#        varlist : nl VARLT ":" spnl "{" spnl "}"
+#                | nl VARLT ":" spnl "{" spnl declist spnl "}"
+#        funclist : nl FNLT ":"
+#                 | nl FNLT ":" list'''
+    
+def p_struct(p):
+    '''struct : nl
+              | struct VARNAME space "{" spnl declist spnl "}" nl
+              | struct VARNAME "*" space "{" spnl declist spnl "}" nl'''
+
+def p_structs(p):
+    '''structs : nl STRT ":" struct'''
+
+def p_prog(p):
+    '''prog : structlist varlist funclist structs func tac'''
 
 def p_error(p):
     if p:
         print("Syntax error at line %d" % lno)
+        print("Syntax error at '%s'" % p.value)
     else:
         print("Syntax error at EOF")
 
