@@ -1,12 +1,10 @@
 import ply.yacc as yacc
 from scanner import tokens
 
-# precedence = (
-#     ('right', 'LVL1'),
-#     ('right', 'LVL2'),
-#     ('right', 'LVL3'),
-#     # ('left', ':'),
-# )
+precedence = (
+    ('nonassoc', 'LVL1'),
+    ('nonassoc', 'LVL2'),
+)
 
 #TODO
 # list of statements
@@ -22,8 +20,8 @@ alno = 1
 start = "prog"
 
 def p_space(p):
-    '''space :
-             | space SPACES'''
+    '''space : %prec LVL1
+             | SPACES %prec LVL2'''
     p[0] = ''
 
 def p_var(p):
@@ -138,15 +136,15 @@ def p_nl(p):
     lno += p[1]
 
 def p_funcbody(p):
-    '''funcbody :
-                | funcbody nl stmt'''
+    '''funcbody : spnl
+                | funcbody stmt nl'''
     # if p[2] != ':':
     #     print(lno, p[2])
     #     statements.append(p[2])
 
 def p_func(p):
     '''func : FUNCS ":" nl
-            | func VARNAME "{" funcbody spnl "}" nl'''
+            | func VARNAME "{" funcbody "}" nl'''
 
 def p_space_nl(p):
     '''spnl : space
@@ -197,6 +195,9 @@ def p_struct(p):
 
 def p_structs(p):
     '''structs : nl STRT ":" struct'''
+
+# def p_prog(p):
+#     '''prog : func'''
 
 def p_prog(p):
     '''prog : structlist varlist funclist structs func tac'''
