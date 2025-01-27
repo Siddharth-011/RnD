@@ -2,6 +2,7 @@ import ply.yacc as yacc
 from scanner import tokens
 
 precedence = (
+    ('left', 'NUMBER'),
     ('nonassoc', 'LVL1'),
     ('nonassoc', 'LVL2'),
 )
@@ -29,84 +30,76 @@ def p_var(p):
            | TMPVARNAME'''
     p[0] = p[1]
 
-def p_elem(p):
-    '''elem : space var space
-            | space NUMBER space'''
-    p[0] = p[2]
+def p_bool_op(p):
+    '''boolop : space LTE space
+              | space GTE space
+              | space "<" space
+              | space ">" space
+              | space "=" "=" space
+              | space "!" "=" space'''
+    if p[2] == '<=':
+        p[0] = 'LTE'
+    elif p[2] == '>=':
+        p[0] = 'GTE'
+    elif p[2] == '<':
+        p[0] = 'LT'
+    elif p[2] == '>':
+        p[0] = 'GT'
+    elif p[2] == '=':
+        p[0] = 'EQ'
+    else:
+        p[0] = 'NEQ'
 
 def p_bool_exp(p):
-    '''boolexp : elem LTE elem
-               | elem GTE elem
-               | elem "<" elem
-               | elem ">" elem
-               | elem "=" "=" elem
-               | elem "!" "=" elem'''
-    if p[2] == '<=':
-        # print('LTE')
-        p[0] = ['LTE', p[1], p[3]]
-    elif p[2] == '>=':
-        # print('GTE')
-        p[0] = ['GTE', p[1], p[3]]
-    elif p[2] == '<':
-        # print('LT')
-        p[0] = ['LT', p[1], p[3]]
-    elif p[2] == '>':
-        # print('GT')
-        p[0] = ['GT', p[1], p[3]]
-    elif p[2] == '=':
-        # print('EQ')
-        p[0] = ['EQ', p[1], p[4]]
-    else:
-        # print("NEQ")
-        p[0] = ['NEQ', p[1], p[4]]
+    '''boolexp : var boolop var
+               | var boolop NUMBER
+               | NUMBER boolop var
+               | NUMBER boolop NUMBER'''
+    p[0] = [p[2], p[1], p[3]]
 
 def p_lhs(p):
-    '''lhs : space var space
-           | space "*" var space
-           | space var "-" ">" var space
-           | space var "." var space'''
-    if p[2] == '*':
-        # print("PTR")
-        p[0] = ['PTR', p[3]]
-    elif p[3] == '-':
-        # print("FLP")
-        p[0] = ['FLP', p[2], p[5]]
-    elif p[3] == '.':
-        # print("FLD")
-        p[0] = ['FLD', p[2], p[4]]
-    else:
+    '''lhs : var %prec NUMBER
+           | "*" var
+           | var "-" ">" var
+           | var "." var'''
+    if len(p) == 2:
         # print("VAR")
-        p[0] = p[2]
+        p[0] = p[1]
+    elif p[1] == '*':
+        # print("PTR")
+        p[0] = ['PTR', p[2]]
+    elif p[2] == '-':
+        # print("FLP")
+        p[0] = ['FLP', p[1], p[4]]
+    else:
+        # print("FLD")
+        p[0] = ['FLD', p[1], p[3]]
     
 def p_rhs(p):
     '''rhs : boolexp
            | lhs
-           | space "&" var space
-           | space NUMBER space'''
-    if len(p)==2:
-        p[0] = p[1]
-    elif p[2] == '&':
-        p[0] = ['ADR', p[3]]
+           | "&" var
+           | NUMBER'''
+    if len(p)==3:
+        p[0] = ['ADR', p[2]]
     else:
-        p[0] = p[2]
+        p[0] = p[1]
     # print(p[0][0])
 
 def p_stmt(p):
-    '''stmt : lhs "=" rhs
-            | space READ space var space
-            | space GOTO space NUMBER space
-            | space IF boolexp GOTO space NUMBER space
-            | space IF space var space GOTO space NUMBER space'''
-    if p[2] == '=':
-        p[0] = ['ASG', p[1], p[3]]
-    elif p[2] == 'read':
-        p[0] = ['INP', p[4]]
-    elif p[2] == 'goto':
-        p[0] = ['GOT', p[4][1]]
-    elif p[4] == 'goto':
-        p[0] = ['IF', p[3], p[6][1]]
+    '''stmt : lhs space "=" space rhs
+            | READ space var
+            | GOTO space NUMBER
+            | IF space boolexp space GOTO space NUMBER
+            | IF space var space GOTO space NUMBER'''
+    if p[3] == '=':
+        p[0] = ['ASG', p[1], p[5]]
+    elif p[1] == 'read':
+        p[0] = ['INP', p[3]]
+    elif p[1] == 'goto':
+        p[0] = ['GOT', p[3][1]]
     else:
-        p[0] = ['IF', p[4], p[8][1]]
+        p[0] = ['IF', p[3], p[7][1]]
     # print(lno,p[0])
     global alno
     alno += 1
@@ -136,15 +129,16 @@ def p_nl(p):
     lno += p[1]
 
 def p_funcbody(p):
-    '''funcbody : spnl
-                | funcbody stmt nl'''
+    '''funcbody : stmt
+                | funcbody nl stmt'''
     # if p[2] != ':':
     #     print(lno, p[2])
     #     statements.append(p[2])
 
 def p_func(p):
     '''func : FUNCS ":" nl
-            | func VARNAME "{" funcbody "}" nl'''
+            | func VARNAME "{" spnl funcbody spnl "}" nl
+            | func VARNAME "{" spnl "}" nl'''
 
 def p_space_nl(p):
     '''spnl : space
@@ -159,23 +153,28 @@ def p_list(p):
         p[0] = p[1]
         p[0].append(p[5][1])
 
+def p_boxlist(p):
+    '''blist : "[" spnl list spnl "]"
+             | "[" spnl "]"'''
+    p[0] = []
+    if len(p) == 6:
+        p[0] = p[3]
+
 def p_dec_list(p):
-    '''declist : VARNAME space ":" space "{" spnl list spnl "}"
-               | VARNAME "*" space ":" space "{" spnl list spnl "}"
-               | declist spnl "," spnl VARNAME space ":" space "{" spnl list spnl "}"
-               | declist spnl "," spnl VARNAME "*" space ":" space "{" spnl list spnl "}"'''
+    '''declist : VARNAME space ":" space blist
+               | VARNAME "*" space ":" space blist
+               | declist spnl "," spnl VARNAME space ":" space blist
+               | declist spnl "," spnl VARNAME "*" space ":" space blist'''
     # if len(p) == 4:
     #     print(p[2], p[3])
     # else:
     #     print(p[3], p[4])
 
 def p_lists(p):
-    '''structlist : spnl STLT space "=" space "{" spnl "}"
-                  | spnl STLT space "=" space "{" spnl list spnl "}"
+    '''structlist : spnl STLT space "=" space blist
        varlist : nl VARLT space "=" space "{" spnl "}"
                | nl VARLT space "=" space "{" spnl declist spnl "}"
-       funclist : nl FNLT space "=" space "{" spnl "}"
-                | nl FNLT space "=" space "{" spnl list spnl "}"'''
+       funclist : nl FNLT space "=" space blist'''
     # if len(p) == 5:
     #     # structlist = p[4]
     #     print(p[4])

@@ -1,18 +1,18 @@
 
-structlist = {sta, stb
+structlist = [sta, stb
    ,stc,
-    std}
+    std]
 
-varlist = { scalar : {a, b, c},
-            sta* : {a, b, c, d}
+varlist = { scalar : [a, b, c],
+            sta* : [a, b, c, d]
           }
 
-funclist = {funca, funcb}
+funclist = [funca, funcb]
 
 structs:
 sta{
-    scalar : {a, b, c},
-    scalar* : {d, e, f}
+    scalar : [a, b, c],
+    scalar* : [d, e, f]
 }
 
 funcs:
@@ -37,7 +37,7 @@ d = &a
 
 goto 13
 
-if a<b goto 20
+if a >b goto 20
 
 read a
 

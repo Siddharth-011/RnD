@@ -14,7 +14,7 @@ reserved  = {
 }
 tokens = ['VARNAME', 'TMPVARNAME', 'NUMBER', 'SPACES', 'NEWLINE', 'LTE', 'GTE'] + list(reserved.values())
 
-literals = ['=', '*', '!', '&', '<', '>', '{', '}', '-', '.', ':', ',']
+literals = ['=', '*', '!', '&', '<', '>', '{', '}', '-', '.', ':', ',', '[', ']']
 
 # t_VARNAME = r'[a-zA-Z]+'
 # t_TMPVARNAME = r't[0-9]+'
