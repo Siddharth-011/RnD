@@ -10,22 +10,20 @@ reserved  = {
     'funclist' : 'FNLT',
     'structs' : 'STRT',
     'funcs' : 'FUNCS',
-    'code' : 'CODE'
+    'main' : 'CODE',
+    'call' : 'CALL'
 }
-tokens = ['VARNAME', 'TMPVARNAME', 'NUMBER', 'SPACES', 'NEWLINE', 'LTE', 'GTE'] + list(reserved.values())
+tokens = ['VARNAME', 'NUMBER', 'SPACES', 'NEWLINE', 'LTE', 'GTE'] + list(reserved.values())
 
 literals = ['=', '*', '!', '&', '<', '>', '{', '}', '-', '.', ':', ',', '[', ']']
 
 # t_VARNAME = r'[a-zA-Z]+'
 # t_TMPVARNAME = r't[0-9]+'
 
-def t_TMPVARNAME(t):
-    r't[0-9]+'
-    t.value = ['TMP', str(t.value)]
-    return t
+lno = 1
 
 def t_VARNAME(t):
-    r'[a-zA-Z]+'
+    r'[a-zA-Z][a-zA-Z0-9]*'
     t.type = reserved.get(t.value,'VARNAME')
     if t.type == 'VARNAME':
         t.value = ['VAR', str(t.value)]
@@ -33,12 +31,14 @@ def t_VARNAME(t):
 
 def t_NUMBER(t):
     r'\d+(\.[\d]+)?'
-    t.value = ['NUM', int(t.value)]
+    t.value = ['NUM', float(t.value)]
     return t
 
 def t_NEWLINE(t):
     r'([\s\t]+)?\n[\s\t\n]*'
     t.value = t.value.count("\n")
+    global lno
+    lno += t.value
     return t
 
 #TODO
@@ -54,8 +54,9 @@ t_GTE = r'>='
 #     t.lexer.lineno += t.value.count("\n")
 
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+    raise Exception("Illegal character '"+ str(t.value[0])+ "', at line number "+ str(lno))
+    # print("Illegal character '%s'" % t.value[0])
+    # t.lexer.skip(1)
 
 # Build the lexer
 lexer = lex.lex()

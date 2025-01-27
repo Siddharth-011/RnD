@@ -3,8 +3,8 @@ structlist = [sta, stb
    ,stc,
     std]
 
-varlist = { scalar : [a, b, c],
-            sta* : [a, b, c, d]
+varlist = { scalar : [a, b, c, d],
+            sta* : [a1, b1, c1, d1]
           }
 
 funclist = [funca, funcb]
@@ -14,14 +14,21 @@ sta{
     scalar : [a, b, c],
     scalar* : [d, e, f]
 }
+stb{}
+
 
 funcs:
 funca{
     a = b
     b = c
 }
+funcc{
+    a = b
+    b = c
+}
 
-code:
+main:
+
 a = &d
 
 
@@ -29,7 +36,8 @@ a = &d
 b = a->b
 a->b = &c
   
-  
+call funca
+
  
 c = *a   
      
@@ -37,8 +45,10 @@ d = &a
 
 goto 13
 
-if a >b goto 20
+if a>b goto 20
 
 read a
 
-if b goto 12
+if a goto 12
+
+a = 12.3
