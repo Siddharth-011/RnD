@@ -1,13 +1,4 @@
 
-structlist = [sta, stb
-   ,stc,
-    std]
-
-varlist = { scalar : [a, b, c, d],
-            sta* : [a1, b1, c1, d1]
-          }
-
-funclist = [funca, funcb]
 
 structs:
 sta{
@@ -18,37 +9,21 @@ stb{}
 
 
 funcs:
-funca{
-    a = b
-    b = c
+funca(scalar x){
+    varlist = { scalar : [a, b, c, d],
+            sta* : [a1, b1, c1, d1]
+          }
 }
-funcc{
-    a = b
-    b = c
+funcc( scalar a, scalar b ){
+    varlist = {scalar*:[c,d]}
+
+
 }
 
 main:
-
-a = &d
-
-
-     
-b = a->b
-a->b = &c
-  
-call funca
-
- 
-c = *a   
-     
-d = &a
-
-goto 13
-
-if a>b goto 20
-
-read a
-
-if a goto 12
-
-a = 12.3
+varlist = { scalar : [d, b, c],
+            sta* : [a1, b1, c1, d1]
+          }
+b = 10
+scalar a
+if a goto 27
