@@ -2,28 +2,25 @@
 
 structs:
 sta{
-    scalar : [a, b, c],
-    scalar* : [d, e, f]
+    scalar a, b, c
+    scalar*  d, e, f
 }
-stb{}
+stb{scalar  a,d,s}
 
 
 funcs:
-funca(scalar x){
-    varlist = { scalar : [a, b, c, d],
-            sta* : [a1, b1, c1, d1]
-          }
-}
 funcc( scalar a, scalar b ){
-    varlist = {scalar*:[c,d]}
+    
 
 
+}
+funca( scalar b){
+    b = 10
+
+    b = 20
 }
 
 main:
-varlist = { scalar : [d, b, c],
-            sta* : [a1, b1, c1, d1]
-          }
+scalar b, a
 b = 10
-scalar a
-if a goto 27
+if a goto 1

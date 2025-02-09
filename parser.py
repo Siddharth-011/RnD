@@ -26,8 +26,8 @@ usedfunclist = set()
 
 # Used for error checking
 varlist = set()
-# Saved for each function
 structdict = {}
+# Saved for each function
 vardict = {}
 
 start = "prog"
@@ -38,7 +38,6 @@ def prepare_next_function():
     lnomap = []
     alno = 0
     varlist.clear()
-    structdict.clear()
     vardict.clear()
 
 def checkvar(var):
@@ -191,7 +190,7 @@ def p_stmt(p):
             p[1] = [checkvar(p[1][1]), p[1]]
         if p[1][0] != p[5][0]:
             raise Exception("Type Mismatch: LHS type - '"+p[1][0]+"', RHS type - '"+p[5][0]+"' on assignment statement at line "+str(lno))
-        p[0] = ['ASG', p[1], p[5]]
+        p[0] = ['ASG', p[1][1], p[5][1]]
     elif p[1] == 'read':
         checktype(p[3][1], 'scalar')
         p[0] = ['INP', p[3]]
@@ -213,13 +212,16 @@ def p_stmt(p):
     # print(lno,p[0])
     global alno
     alno += 1
+
+    print(lno, p[0])
+    statements.append(p[0])
     
 def p_tac(p):
-    '''tac : MAINCODE ":" nl varlist
+    '''tac : nl MAINCODE ":"
            | tac stmtnl stmt'''
-    if p[2] != ':':
-        print(lno, p[3])
-        statements.append(p[3])
+    # if p[2] != ':':
+    #     print(lno, p[3])
+    #     statements.append(p[3])
     # | stmt
     # elif p[1] != '':
     #     # print(lno, p[1])
@@ -297,23 +299,20 @@ def p_func_params(p):
         p[0] = p[3][0]
         vardict.update(p[3][1])
         varlist.update(p[3][2])
+    global flno
+    flno = lno
 
 def p_func(p):
-    '''func : FUNCS ":" nl
-            | func VARNAME funcparams spnl "{" funcvarlist funcbody spnl "}" nl
-            | func VARNAME funcparams spnl "{" funcvarlist "}" nl'''
-    if len(p) == 11:
-        p[2][1] = p[2][1]+param_to_string(p[3])
-        if p[2][1] in deffunclist:
-            raise Exception("Redeclaration of function '"+p[2][1]+"' at line number "+str(lno - p[10]))
-        deffunclist.add(p[2][1])
-        funcdict[p[2][1]] = [p[3], vardict, clean_statements()]
-    elif len(p) == 9:
-        p[2][1] = p[2][1]+param_to_string(p[3])
-        if p[2][1] in deffunclist:
-            raise Exception("Redeclaration of function '"+p[2][1]+"' at line number "+str(lno - p[8]))
-        deffunclist.add(p[2][1])
-        funcdict[p[2][1]] = [p[3], vardict, []]
+    '''func : FUNCS ":"
+            | func nl VARNAME funcparams spnl "{" spnl funcbody spnl "}"
+            | func nl VARNAME funcparams spnl "{" spnl "}"'''
+    if len(p) != 3:
+        p[3][1] = p[3][1]+param_to_string(p[4])
+        if p[3][1] in deffunclist:
+            # raise Exception("Redeclaration of function '"+p[2][1]+"' at line number "+str(lno - p[10]))
+            raise Exception("Redeclaration of function '"+p[3][1]+"' at line number "+str(flno))
+        deffunclist.add(p[3][1])
+        funcdict[p[3][1]] = [p[4], vardict, clean_statements()]
     elif usedstructlist - defstructlist:
         raise Exception("Structure/s " + str(usedstructlist - defstructlist) + " used without definition")
     prepare_next_function()
@@ -321,6 +320,10 @@ def p_func(p):
 def p_space_nl(p):
     '''spnl : space
             | nl'''
+    if p[1] == '':
+        p[0] = 0
+    else:
+        p[0] = p[1]
 
 def p_list(p):
     '''list : VARNAME space
@@ -341,16 +344,18 @@ def p_boxlist(p):
         p[0] = p[3]
 
 def p_dec_list(p):
-    '''declist : VARNAME space ":" space blist
-               | VARNAME "*" space ":" space blist
-               | declist spnl "," spnl VARNAME space ":" space blist
-               | declist spnl "," spnl VARNAME "*" space ":" space blist'''
-    if len(p) < 8:
+    '''declist : VARNAME SPACES list
+               | VARNAME "*" SPACES list
+               | declist nl VARNAME SPACES list
+               | declist nl VARNAME "*" SPACES list'''
+    if len(p) < 6:
         elemtype = p[1][1]
         elemdict = {}
         elemlist = set()
+        global flno
+        flno = lno
     else:
-        elemtype = p[5][1]
+        elemtype = p[3][1]
         elemdict = p[1][0]
         elemlist = p[1][1]
     usedstructlist.add(elemtype)
@@ -363,20 +368,6 @@ def p_dec_list(p):
     for elem in elemset:
         elemdict[elem] = elemtype
     p[0] = [elemdict, elemlist]
-
-def p_var_list(p):
-    '''varlist : VARLT space "=" space "{" spnl "}"
-               | VARLT space "=" space "{" spnl declist spnl "}"'''
-    if len(p) == 10:
-        vardict.update(p[7][0])
-        varlist.update(p[7][1])
-
-def p_func_var_list(p):
-    '''funcvarlist : spnl
-                   | spnl varlist nl'''
-    global flno
-    flno = lno
-    print("FLNO = "+str(flno))
     
 def p_structs(p):
     '''structs : spnl STRT ":" nl
@@ -384,12 +375,12 @@ def p_structs(p):
               | structs VARNAME space "{" spnl "}" nl'''
     if len(p) == 10:
         if p[2][1] in defstructlist:
-            raise Exception("Redectaration of structure '"+p[2][1]+"' at line number "+str(lno - p[9]))
+            raise Exception("Redectaration of structure '"+p[2][1]+"' at line number "+str(flno - p[5]))
         structdict[p[2][1]] = p[6]
         defstructlist.add(p[2][1])
     elif len(p) == 8:
         if p[2][1] in defstructlist:
-            raise Exception("Redectaration of structure '"+p[2][1]+"' at line number "+str(lno - p[7]))
+            raise Exception("Redectaration of structure '"+p[2][1]+"' at line number "+str(lno - p[5] - p[7]))
         structdict[p[2][1]] = [{}, set()]
         defstructlist.add(p[2][1])
 
@@ -441,4 +432,4 @@ while True:
     print('Functions')
     print(deffunclist)
     print(usedfunclist)
-    break
+    break # type: ignore
