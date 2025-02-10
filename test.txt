@@ -2,25 +2,30 @@
 
 structs:
 sta{
-    scalar a, b, c
-    scalar*  d, e, f
+    sta* a
 }
 stb{scalar  a,d,s}
 
 
 funcs:
-funcc( scalar a, scalar b ){
-    
+func( scalar a, scalar b ){
+    a = 10
 
-
-}
-funca( scalar b){
-    b = 10
-
-    b = 20
+    if a goto 15
 }
 
 main:
-scalar b, a
-b = 10
-if a goto 1
+scalar a
+scalar* x
+sta* p, q
+sta z
+scalar** m
+
+m = &x
+
+
+a = 10
+x=&a
+*x = 10
+p = &z
+q = p

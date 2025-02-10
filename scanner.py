@@ -10,14 +10,19 @@ reserved  = {
     'main' : 'MAINCODE',
     'call' : 'CALL'
 }
-tokens = ['VARNAME', 'NUMBER', 'SPACES', 'NEWLINE', 'LTE', 'GTE'] + list(reserved.values())
+tokens = ['VARNAME', 'NUMBER', 'SPACES', 'NEWLINE', 'LTE', 'GTE', 'STARS'] + list(reserved.values())
 
-literals = ['=', '*', '!', '&', '<', '>', '{', '}', '-', '.', ':', ',', '[', ']', '(', ')']
+literals = ['=', '!', '&', '<', '>', '{', '}', '-', '.', ':', ',', '[', ']', '(', ')']
 
 # t_VARNAME = r'[a-zA-Z]+'
 # t_TMPVARNAME = r't[0-9]+'
 
 lno = 1
+
+def t_STARS(t):
+    r'\*+'
+    # t.value = ['*', t.value]
+    return t
 
 def t_VARNAME(t):
     r'[a-zA-Z][a-zA-Z0-9]*'
