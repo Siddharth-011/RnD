@@ -8,7 +8,8 @@ reserved  = {
     'structs' : 'STRT',
     'funcs' : 'FUNCS',
     'main' : 'MAINCODE',
-    'call' : 'CALL'
+    'call' : 'CALL',
+    'malloc' : 'MALLOC'
 }
 tokens = ['VARNAME', 'NUMBER', 'SPACES', 'NEWLINE', 'LTE', 'GTE', 'STARS'] + list(reserved.values())
 

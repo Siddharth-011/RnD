@@ -2,7 +2,7 @@
 
 structs:
 sta{
-    sta* a
+    sta* f
 }
 stb{scalar  a,d,s}
 
@@ -14,18 +14,14 @@ func( scalar a, scalar b ){
     if a goto 15
 }
 
+
 main:
-scalar a
-scalar* x
 sta* p, q
-sta z
-scalar** m
+sta a, b
 
-m = &x
-
-
-a = 10
-x=&a
-*x = 10
-p = &z
+p = malloc()
+q = malloc()
+p->f = q
 q = p
+p->f = &a
+p = &b

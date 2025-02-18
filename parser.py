@@ -187,6 +187,7 @@ def p_stmt(p):
     '''stmt : vardec
             | lhs space "=" space rhs
             | VARNAME space "=" space rhs
+            | VARNAME space "=" space MALLOC "(" ")"
             | READ SPACES VARNAME
             | GOTO SPACES NUMBER
             | CALL SPACES VARNAME funcargs
@@ -197,6 +198,13 @@ def p_stmt(p):
     elif p[3] == '=':
         if p[1][0] == 'VAR':
             p[1] = [checkvar(p[1][1]), p[1]]
+            if len(p) == 8:
+                if p[1][0][-1] != '*':
+                    raise Exception("Malloc can only be called when lhs is a pointer, at line "+str(lno))
+                elem = '$'+str(lno)
+                p[5] = [p[1][0], ['MAL', elem]]
+                vardict[elem] = p[1][0][:-1]
+                varlist.add(elem)
         if p[1][0] != p[5][0]:
             raise Exception("Type Mismatch: LHS type - '"+p[1][0]+"', RHS type - '"+p[5][0]+"' on assignment statement at line "+str(lno))
         p[0] = ['ASG', p[1], p[5]]
@@ -344,6 +352,8 @@ def p_dec_list(p):
     usedstructlist.add(elemtype)
     if len(p)%2 == 1:
         elemtype = elemtype + p[len(p)-3]
+    elif elemtype != 'scalar':
+        raise Exception("Struct fields can only be pointers or scalars, at line "+str(lno))
     elemset = p[len(p)-1]
     if elemlist.intersection(elemset):
         raise Exception("Redeclaration of variable/s or field/s "+str(elemlist.intersection(elemset))+" at line number "+str(lno))
