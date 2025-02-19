@@ -1,6 +1,9 @@
 from pta_helper import *
 import graphviz
 
+num_colors = 9
+colorscheme = 'set19'
+
 def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
     ptr_dict = {}
     isunk_ptr_dict = {}
@@ -27,28 +30,33 @@ def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
 
     print("Andersens Iteration -", count, "(confirmation)")
 
-    dot = graphviz.Digraph(comment="Andersen's PTA", node_attr={'colorscheme':'set19', 'style':'filled'}, edge_attr={'colorscheme':'set19'}, engine='dot')
     count = 0
+    dot = graphviz.Digraph(comment="Andersen's PTA", node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'dpi':'250'}, engine='dot')
     color_dict = {}
+
     for node in ptr_dict.keys():
-        count = count%9 + 1
+        count = count%num_colors + 1
         color_dict[node] = str(count)
         dot.node(node, color = str(count))
+
     for key, val in ptr_dict.items():
         print(key,":")
         for key2, val2 in val.items():
             print('\t',key2, '-', val2)
             for v in val2:
                 dot.edge(key, v, label = key2, color = color_dict[key])
+    # dot.unflatten(stagger=3)
     dot.render('andersens', format='png', cleanup=True)
 
 def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
     ptr_dict = {}
     isunk_ptr_dict = {}
     var_to_set_dict = {}
+    set_to_var_dict = {}
 
     for var, typ in var_dict.items():
         var_to_set_dict[var] = var
+        set_to_var_dict[var] = [var]
         if contains_pointer(typ, struct_dict):
             ptr_dict[var] = {}
             isunk_ptr_dict[var] = False
@@ -67,79 +75,50 @@ def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
     while change:
         change = False
         # print("Iteration -",count)
+        count += 1
         for (lhs, rhs) in new_stmt_lst:
             pointee = get_pointee(ptr_dict, rhs, var_to_set_dict)
-            if pointee != None:
-                pointee = var_to_set_dict[pointee]
-                # print(pointee)
-                var, fld = get_def(ptr_dict, lhs)
-                # sets_to_unify = set([pointee])
-                # print(ptr_dict)
-                # print(var_to_set_dict)
-                if var != None:
-                    var = var_to_set_dict[var]
-                    old_var = ptr_dict[var][fld]
-                    if old_var is None:
-                        ptr_dict[var][fld] = pointee
-                        change = True
-                    else:
-                        sets_to_unify = set([pointee, var_to_set_dict[old_var]])
-                        # sets_to_unify.add(var_to_set_dict[ptr_dict[var][fld]])
-                        # vars_to_unify.add(ptr_dict[vars][fld])
-                        change = unify(ptr_dict, sets_to_unify, var_to_set_dict) or change
 
-        count += 1
+            if pointee is None:
+                continue
 
-    print("Steensgard Iteration -", count, "(confirmation)")
+            pointee = var_to_set_dict[pointee]
+            # print(pointee)
+            var, fld = get_def(ptr_dict, lhs)
+            # print(ptr_dict)
+            # print(var_to_set_dict)
+
+            if var == None:
+                continue
+
+            var = var_to_set_dict[var]
+            old_var = ptr_dict[var][fld]
+            if old_var is None:
+                ptr_dict[var][fld] = pointee
+                change = True
+            else:
+                sets_to_unify = [pointee, var_to_set_dict[old_var]]
+                change = unify(ptr_dict, sets_to_unify, var_to_set_dict, set_to_var_dict) or change
+
+    print("Steensgaard Iteration -", count, "(confirmation)")
+
+    count = 0
+    dot = graphviz.Digraph(comment="Steensgaard's PTA", node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'dpi':'250'}, engine='dot')
+    color_dict = {}
+
+    for node in ptr_dict.keys():
+        count = count%num_colors + 1
+        color_dict[node] = str(count)
+        vars = '\n'.join(set_to_var_dict[node])
+        dot.node(node, vars, color = str(count))
+
     for key, val in ptr_dict.items():
         print(key,":")
         for key2, val2 in val.items():
-            print('\t',key2, '-', val2)
-    
-    set_to_var_dict = {}
-    for var, set_ in var_to_set_dict.items():
-        if set_ in set_to_var_dict:
-            set_to_var_dict[set_].append(var)
-        else:
-            set_to_var_dict[set_] = [var]
+            if val2 is None:
+                continue
+            print('\t',key2, '-', var_to_set_dict[val2])
+            dot.edge(key, var_to_set_dict[val2], label = key2, color = color_dict[key])
     print(set_to_var_dict)
 
-def unify(ptr_dict, sets_to_unify, var_to_set_dict):
-    if len(sets_to_unify) == 1:
-        return False
-    else:
-        print(sets_to_unify)
-        new_set = sets_to_unify.pop()
-        # print(new_set)
-
-        # var_to_set_dict[new_set] = new_set
-
-        new_sets_to_unify_dict = {}
-        for fld, val in ptr_dict[new_set].items():
-            new_sets_to_unify_dict[fld] = set([val])
-
-        for var, old_set in var_to_set_dict.items():
-            if old_set in sets_to_unify:
-                var_to_set_dict[var] = new_set
-
-        sets_to_unify = list(sets_to_unify)
-
-        for old_set in sets_to_unify:
-            for fld, var in ptr_dict[old_set].items():
-                if var != None:
-                    new_sets_to_unify_dict[fld].add(var_to_set_dict[var])
-            del ptr_dict[old_set]
-
-        change = False
-
-        for vars in new_sets_to_unify_dict.values():
-            vars.discard(None)
-            vars = list(vars)
-            new_sets_to_unify = set()
-
-            for var in vars:
-                new_sets_to_unify.add(var_to_set_dict[var])
-
-            change = unify(ptr_dict, sets_to_unify, var_to_set_dict) or change
-
-        return change
+    dot.render('steensgaard', format='png', cleanup=True)

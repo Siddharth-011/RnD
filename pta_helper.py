@@ -117,3 +117,41 @@ def set_dicts(var_dict, struct_dict, ptr_dict, isunk_ptr_dict, enable_unk = True
                 for field, field_typ in struct_dict[typ][0].items():
                     if field_typ[-1] == '*':
                         ptr_dict[var][field] = set()
+
+def unify(ptr_dict, sets_to_unify, var_to_set_dict, set_to_var_dict):
+    if sets_to_unify[0] == sets_to_unify[1]:
+        return False
+    else:
+        # print(sets_to_unify)
+        new_set = sets_to_unify[0]
+        unified_set = sets_to_unify[1]
+        # print(new_set)
+
+        set_to_var_dict[new_set].extend(set_to_var_dict.pop(unified_set))
+
+        for var, old_set in var_to_set_dict.items():
+            if old_set == unified_set:
+                var_to_set_dict[var] = new_set
+
+        new_sets_to_unify_dict = {}
+        for fld, var in ptr_dict[new_set].items():
+            if var != None:
+                new_sets_to_unify_dict[fld] = [var_to_set_dict[var]]
+            else:
+                new_sets_to_unify_dict[fld] = []
+
+        sets_to_unify = list(sets_to_unify)
+
+        for fld, var in ptr_dict[unified_set].items():
+            if var != None:
+                new_sets_to_unify_dict[fld].append(var_to_set_dict[var])
+        del ptr_dict[unified_set]
+
+        change = False
+
+        for new_sets_to_unify in new_sets_to_unify_dict.values():
+            if len(new_sets_to_unify) != 2:
+                continue
+            change = unify(ptr_dict, new_sets_to_unify, var_to_set_dict) or change
+
+        return change

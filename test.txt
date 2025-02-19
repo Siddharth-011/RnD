@@ -3,6 +3,7 @@
 structs:
 sta{
     sta* f
+    sta* g
 }
 stb{scalar  a,d,s}
 
@@ -16,7 +17,7 @@ func( scalar a, scalar b ){
 
 
 main:
-sta* p, q
+sta* p, q, x, y
 sta a, b
 
 p = malloc()
@@ -25,3 +26,9 @@ p->f = q
 q = p
 p->f = &a
 p = &b
+
+x = p
+y = malloc()
+
+x->g = y
+y->g = &a
