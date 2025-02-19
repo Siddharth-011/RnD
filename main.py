@@ -1,5 +1,5 @@
 from parser import parse_file
-from andersen import perform_andersens_analysis
+from fi_pta import perform_andersens_analysis, perform_steensgaards_analysis
 
 file_name = "test.txt"
 
@@ -12,4 +12,5 @@ else:
     # print(struct_dict)
     # print(func_dict['main'])
     perform_andersens_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
+    perform_steensgaards_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
     pass

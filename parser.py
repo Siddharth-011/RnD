@@ -201,7 +201,7 @@ def p_stmt(p):
             if len(p) == 8:
                 if p[1][0][-1] != '*':
                     raise Exception("Malloc can only be called when lhs is a pointer, at line "+str(lno))
-                elem = '$'+str(lno)
+                elem = '$o'+str(lno)
                 p[5] = [p[1][0], ['MAL', elem]]
                 vardict[elem] = p[1][0][:-1]
                 varlist.add(elem)
