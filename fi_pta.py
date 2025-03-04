@@ -1,14 +1,10 @@
 from pta_helper import *
 import graphviz
 
-num_colors = 9
-colorscheme = 'set19'
-
 def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
     ptr_dict = {}
-    isunk_ptr_dict = {}
     
-    set_dicts(var_dict, struct_dict, ptr_dict, isunk_ptr_dict, False)
+    set_dicts(var_dict, struct_dict, ptr_dict, False)
     
     new_stmt_lst = get_pta_stmts(struct_dict, stmt_lst)
 
@@ -19,7 +15,7 @@ def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
         # print("Iteration -", count)
         # print(ptr_dict)
         for (lhs, rhs) in new_stmt_lst:
-            pointees = get_pointees(ptr_dict, rhs, isunk_ptr_dict)
+            pointees = get_pointees(ptr_dict, rhs)
             # print(pointees)
             vars, fld = get_defs(ptr_dict, lhs)
             for var in vars:
@@ -118,7 +114,10 @@ def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
             if val2 is None:
                 continue
             print('\t',key2, '-', var_to_set_dict[val2])
-            dot.edge(key, var_to_set_dict[val2], label = key2, color = color_dict[key])
+            if key2 == '*':
+                dot.edge(key, var_to_set_dict[val2], label = '⁎', color = color_dict[key])
+            else:
+                dot.edge(key, var_to_set_dict[val2], label = key2, color = color_dict[key])
     print(set_to_var_dict)
 
     dot.render('steensgaard', format='png', cleanup=True)

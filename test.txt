@@ -6,29 +6,56 @@ sta{
     sta* g
 }
 stb{scalar  a,d,s}
-
+stc{stc* x}
 
 funcs:
 func( scalar a, scalar b ){
     a = 10
-
+    if a<10 goto 17
     if a goto 15
+    sta* x,y
+    goto 21
+
+    goto 23
+
+    goto 19
+
+    goto 17
+    x = y
 }
 
 
 main:
-sta* p, q, x, y
-sta a, b
+//sta* p, q, x, y
+//sta a, b
+//
+//p = malloc()
+//q = malloc()
+//p->f = q
+////q = p
+//p->f = &a
+//p = &b
+//
+//x = p
+//y = malloc()
+//
+//x->g = y
+//y->g = &a
 
-p = malloc()
-q = malloc()
-p->f = q
-q = p
-p->f = &a
-p = &b
 
-x = p
-y = malloc()
+scalar a,b,c,d, z
+scalar* q,r,e
+scalar** p
+if 10<20 goto 56
 
-x->g = y
-y->g = &a
+p = &q
+q = &a
+r = &c
+*p = &z
+goto 60
+
+p = &r
+q = &b
+r = &d
+
+e = *p

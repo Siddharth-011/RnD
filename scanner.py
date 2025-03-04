@@ -1,4 +1,5 @@
 import ply.lex as lex
+# from ply.lex import TOKEN
 
 # Tokens
 reserved  = {
@@ -17,6 +18,10 @@ literals = ['=', '!', '&', '<', '>', '{', '}', '-', '.', ':', ',', '[', ']', '('
 
 # t_VARNAME = r'[a-zA-Z]+'
 # t_TMPVARNAME = r't[0-9]+'
+# t_ignore = r'#'
+
+# comment = r'\/\/[^\n]*\n'
+# nl_c = r'([\s\t]+)?(\/\/[^\n]*)?\n[\s\t\n'+comment+r']*'
 
 lno = 1
 
@@ -38,9 +43,10 @@ def t_NUMBER(t):
     return t
 
 def t_NEWLINE(t):
-    r'([\s\t]+)?\n[\s\t\n]*'
+    r'[\s\t]*(//[^\n]*)?\n(\s | \t | \n | //[^\n]*\n)*'
     t.value = t.value.count("\n")
     global lno
+    # print("NL", lno, t.value)
     lno += t.value
     return t
 

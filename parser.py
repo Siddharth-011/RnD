@@ -110,25 +110,19 @@ def p_bool_op(p):
               | space ">" space
               | space "=" "=" space
               | space "!" "=" space'''
-    if p[2] == '<=':
-        p[0] = 'LTE'
-    elif p[2] == '>=':
-        p[0] = 'GTE'
-    elif p[2] == '<':
-        p[0] = 'LT'
-    elif p[2] == '>':
-        p[0] = 'GT'
-    elif p[2] == '=':
-        p[0] = 'EQ'
+    if p[2] == '=':
+        p[0] = '=='
+    elif p[2] == '!':
+        p[0] = '!='
     else:
-        p[0] = 'NEQ'
+        p[0] = p[2]
 
 def p_bool_exp(p):
     '''boolexp : VARNAME boolop VARNAME
                | VARNAME boolop NUMBER
                | NUMBER boolop VARNAME
                | NUMBER boolop NUMBER'''
-    p[0] = ['scalar', [p[2], p[1], p[3]]]
+    p[0] = ['scalar', ['BEX', p[2], p[1], p[3]]]
     if p[1][0] == 'VAR':
         checktype(p[1][1], 'scalar')
     if p[3][0] == 'VAR':
@@ -210,7 +204,7 @@ def p_stmt(p):
         p[0] = ['ASG', p[1], p[5]]
     elif p[1] == 'read':
         checktype(p[3][1], 'scalar')
-        p[0] = ['INP', p[3]]
+        p[0] = ['INP', p[3][1]]
     elif p[1] == 'goto':
         if p[3][1] != int(p[3][1]):
             raise Exception("Line numbers should be integers")
@@ -250,6 +244,11 @@ def p_stmt_nl(p):
     lno += p[1]
     for _ in range(p[1]):
         lnomap.append(alno)
+
+# def p_stmt_nl(p):
+#     r'stmtnl : nl'
+#     for _ in range(p[1]):
+#         lnomap.append(alno)
 
 def p_funcbody(p):
     '''funcbody : stmt
@@ -378,7 +377,7 @@ def p_structs(p):
         defstructlist.add(p[2][1])
 
 def p_prog(p):
-    '''prog : structs func tac'''
+    '''prog : structs func tac spnl'''
 
 def p_error(p):
     if p:
