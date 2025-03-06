@@ -183,6 +183,7 @@ def p_stmt(p):
             | VARNAME space "=" space rhs
             | VARNAME space "=" space MALLOC "(" ")"
             | READ SPACES VARNAME
+            | USE SPACES VARNAME
             | GOTO SPACES NUMBER
             | CALL SPACES VARNAME funcargs
             | IF SPACES boolexp SPACES GOTO SPACES NUMBER
@@ -205,6 +206,8 @@ def p_stmt(p):
     elif p[1] == 'read':
         checktype(p[3][1], 'scalar')
         p[0] = ['INP', p[3][1]]
+    elif p[1] == 'use':
+        p[0] = ['USE', [checkvar(p[3][1]), p[3][1]]]
     elif p[1] == 'goto':
         if p[3][1] != int(p[3][1]):
             raise Exception("Line numbers should be integers")

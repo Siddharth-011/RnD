@@ -1,6 +1,7 @@
 from parser import parse_file
 from fi_pta import perform_andersens_analysis, perform_steensgaards_analysis
 from fs_pta import perform_fspta, get_fspta_stmts
+from lfcpa  import perform_lfcpa
 
 file_name = "test.txt"
 
@@ -20,4 +21,5 @@ else:
     perform_andersens_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
     perform_steensgaards_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
     perform_fspta(struct_dict, func_dict['main'][1], func_dict['main'][2])
+    perform_lfcpa(struct_dict, func_dict['main'][1], func_dict['main'][2])
     pass

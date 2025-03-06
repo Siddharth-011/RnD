@@ -30,94 +30,96 @@ Rule 24    stmt -> lhs space = space rhs
 Rule 25    stmt -> VARNAME space = space rhs
 Rule 26    stmt -> VARNAME space = space MALLOC ( )
 Rule 27    stmt -> READ SPACES VARNAME
-Rule 28    stmt -> GOTO SPACES NUMBER
-Rule 29    stmt -> CALL SPACES VARNAME funcargs
-Rule 30    stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER
-Rule 31    stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER
-Rule 32    tac -> nl MAINCODE :
-Rule 33    tac -> tac stmtnl stmt
-Rule 34    nl -> NEWLINE
-Rule 35    stmtnl -> NEWLINE
-Rule 36    funcbody -> stmt
-Rule 37    funcbody -> funcbody stmtnl stmt
-Rule 38    arglist -> VARNAME
-Rule 39    arglist -> arglist space , space VARNAME
-Rule 40    funcargs -> ( space )
-Rule 41    funcargs -> ( space arglist space )
-Rule 42    paramlist -> VARNAME SPACES VARNAME
-Rule 43    paramlist -> paramlist space , space VARNAME SPACES VARNAME
-Rule 44    funcparams -> ( space )
-Rule 45    funcparams -> ( space paramlist space )
-Rule 46    func -> FUNCS :
-Rule 47    func -> func nl VARNAME funcparams spnl { spnl funcbody spnl }
-Rule 48    func -> func nl VARNAME funcparams spnl { spnl }
-Rule 49    spnl -> space
-Rule 50    spnl -> nl
-Rule 51    list -> VARNAME space
-Rule 52    list -> list , space VARNAME space
-Rule 53    declist -> VARNAME SPACES list
-Rule 54    declist -> VARNAME STARS SPACES list
-Rule 55    declist -> declist nl VARNAME SPACES list
-Rule 56    declist -> declist nl VARNAME STARS SPACES list
-Rule 57    structs -> spnl STRT : nl
-Rule 58    structs -> structs VARNAME space { spnl declist spnl } nl
-Rule 59    structs -> structs VARNAME space { spnl } nl
-Rule 60    prog -> structs func tac spnl
+Rule 28    stmt -> USE SPACES VARNAME
+Rule 29    stmt -> GOTO SPACES NUMBER
+Rule 30    stmt -> CALL SPACES VARNAME funcargs
+Rule 31    stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER
+Rule 32    stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER
+Rule 33    tac -> nl MAINCODE :
+Rule 34    tac -> tac stmtnl stmt
+Rule 35    nl -> NEWLINE
+Rule 36    stmtnl -> NEWLINE
+Rule 37    funcbody -> stmt
+Rule 38    funcbody -> funcbody stmtnl stmt
+Rule 39    arglist -> VARNAME
+Rule 40    arglist -> arglist space , space VARNAME
+Rule 41    funcargs -> ( space )
+Rule 42    funcargs -> ( space arglist space )
+Rule 43    paramlist -> VARNAME SPACES VARNAME
+Rule 44    paramlist -> paramlist space , space VARNAME SPACES VARNAME
+Rule 45    funcparams -> ( space )
+Rule 46    funcparams -> ( space paramlist space )
+Rule 47    func -> FUNCS :
+Rule 48    func -> func nl VARNAME funcparams spnl { spnl funcbody spnl }
+Rule 49    func -> func nl VARNAME funcparams spnl { spnl }
+Rule 50    spnl -> space
+Rule 51    spnl -> nl
+Rule 52    list -> VARNAME space
+Rule 53    list -> list , space VARNAME space
+Rule 54    declist -> VARNAME SPACES list
+Rule 55    declist -> VARNAME STARS SPACES list
+Rule 56    declist -> declist nl VARNAME SPACES list
+Rule 57    declist -> declist nl VARNAME STARS SPACES list
+Rule 58    structs -> spnl STRT : nl
+Rule 59    structs -> structs VARNAME space { spnl declist spnl } nl
+Rule 60    structs -> structs VARNAME space { spnl } nl
+Rule 61    prog -> structs func tac spnl
 
 Terminals, with rules where they appear
 
 !                    : 8
 &                    : 19
-(                    : 26 40 41 44 45
-)                    : 26 40 41 44 45
-,                    : 39 43 52
+(                    : 26 41 42 45 46
+)                    : 26 41 42 45 46
+,                    : 40 44 53
 -                    : 14
 .                    : 15
-:                    : 32 46 57
+:                    : 33 47 58
 <                    : 5
 =                    : 7 7 8 24 25 26
 >                    : 6 14
-CALL                 : 29
-FUNCS                : 46
-GOTO                 : 28 30 31
+CALL                 : 30
+FUNCS                : 47
+GOTO                 : 29 31 32
 GTE                  : 4
-IF                   : 30 31
+IF                   : 31 32
 LTE                  : 3
-MAINCODE             : 32
+MAINCODE             : 33
 MALLOC               : 26
-NEWLINE              : 34 35
-NUMBER               : 10 11 12 12 20 28 30 31
+NEWLINE              : 35 36
+NUMBER               : 10 11 12 12 20 29 31 32
 READ                 : 27
-SPACES               : 2 21 22 27 28 29 30 30 30 31 31 31 42 43 53 54 55 56
-STARS                : 13 22 54 56
-STRT                 : 57
-VARNAME              : 9 9 10 11 13 14 14 15 15 18 19 21 22 25 26 27 29 31 38 39 42 42 43 43 47 48 51 52 53 54 55 56 58 59
+SPACES               : 2 21 22 27 28 29 30 31 31 31 32 32 32 43 44 54 55 56 57
+STARS                : 13 22 55 57
+STRT                 : 58
+USE                  : 28
+VARNAME              : 9 9 10 11 13 14 14 15 15 18 19 21 22 25 26 27 28 30 32 39 40 43 43 44 44 48 49 52 53 54 55 56 57 59 60
 error                : 
-{                    : 47 48 58 59
-}                    : 47 48 58 59
+{                    : 48 49 59 60
+}                    : 48 49 59 60
 
 Nonterminals, with rules where they appear
 
-arglist              : 39 41
-boolexp              : 16 30
+arglist              : 40 42
+boolexp              : 16 31
 boolop               : 9 10 11 12
-declist              : 55 56 58
-func                 : 47 48 60
-funcargs             : 29
-funcbody             : 37 47
-funcparams           : 47 48
+declist              : 56 57 59
+func                 : 48 49 61
+funcargs             : 30
+funcbody             : 38 48
+funcparams           : 48 49
 lhs                  : 17 24
-list                 : 21 22 52 53 54 55 56
-nl                   : 32 47 48 50 55 56 57 58 59
-paramlist            : 43 45
+list                 : 21 22 53 54 55 56 57
+nl                   : 33 48 49 51 56 57 58 59 60
+paramlist            : 44 46
 prog                 : 0
 rhs                  : 24 25
-space                : 3 3 4 4 5 5 6 6 7 7 8 8 24 24 25 25 26 26 39 39 40 41 41 43 43 44 45 45 49 51 52 52 58 59
-spnl                 : 47 47 47 48 48 57 58 58 59 60
-stmt                 : 33 36 37
-stmtnl               : 33 37
-structs              : 58 59 60
-tac                  : 33 60
+space                : 3 3 4 4 5 5 6 6 7 7 8 8 24 24 25 25 26 26 40 40 41 42 42 44 44 45 46 46 50 52 53 53 59 60
+spnl                 : 48 48 48 49 49 58 59 59 60 61
+stmt                 : 34 37 38
+stmtnl               : 34 38
+structs              : 59 60 61
+tac                  : 34 61
 vardec               : 23
 
 Parsing method: LALR
@@ -125,15 +127,15 @@ Parsing method: LALR
 state 0
 
     (0) S' -> . prog
-    (60) prog -> . structs func tac spnl
-    (57) structs -> . spnl STRT : nl
-    (58) structs -> . structs VARNAME space { spnl declist spnl } nl
-    (59) structs -> . structs VARNAME space { spnl } nl
-    (49) spnl -> . space
-    (50) spnl -> . nl
+    (61) prog -> . structs func tac spnl
+    (58) structs -> . spnl STRT : nl
+    (59) structs -> . structs VARNAME space { spnl declist spnl } nl
+    (60) structs -> . structs VARNAME space { spnl } nl
+    (50) spnl -> . space
+    (51) spnl -> . nl
     (1) space -> .
     (2) space -> . SPACES
-    (34) nl -> . NEWLINE
+    (35) nl -> . NEWLINE
 
     STRT            reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
@@ -153,12 +155,12 @@ state 1
 
 state 2
 
-    (60) prog -> structs . func tac spnl
-    (58) structs -> structs . VARNAME space { spnl declist spnl } nl
-    (59) structs -> structs . VARNAME space { spnl } nl
-    (46) func -> . FUNCS :
-    (47) func -> . func nl VARNAME funcparams spnl { spnl funcbody spnl }
-    (48) func -> . func nl VARNAME funcparams spnl { spnl }
+    (61) prog -> structs . func tac spnl
+    (59) structs -> structs . VARNAME space { spnl declist spnl } nl
+    (60) structs -> structs . VARNAME space { spnl } nl
+    (47) func -> . FUNCS :
+    (48) func -> . func nl VARNAME funcparams spnl { spnl funcbody spnl }
+    (49) func -> . func nl VARNAME funcparams spnl { spnl }
 
     VARNAME         shift and go to state 9
     FUNCS           shift and go to state 10
@@ -167,41 +169,43 @@ state 2
 
 state 3
 
-    (57) structs -> spnl . STRT : nl
+    (58) structs -> spnl . STRT : nl
 
     STRT            shift and go to state 11
 
 
 state 4
 
-    (50) spnl -> nl .
+    (51) spnl -> nl .
 
-    STRT            reduce using rule 50 (spnl -> nl .)
-    $end            reduce using rule 50 (spnl -> nl .)
-    }               reduce using rule 50 (spnl -> nl .)
-    VARNAME         reduce using rule 50 (spnl -> nl .)
-    {               reduce using rule 50 (spnl -> nl .)
-    READ            reduce using rule 50 (spnl -> nl .)
-    GOTO            reduce using rule 50 (spnl -> nl .)
-    CALL            reduce using rule 50 (spnl -> nl .)
-    IF              reduce using rule 50 (spnl -> nl .)
-    STARS           reduce using rule 50 (spnl -> nl .)
+    STRT            reduce using rule 51 (spnl -> nl .)
+    $end            reduce using rule 51 (spnl -> nl .)
+    }               reduce using rule 51 (spnl -> nl .)
+    VARNAME         reduce using rule 51 (spnl -> nl .)
+    {               reduce using rule 51 (spnl -> nl .)
+    READ            reduce using rule 51 (spnl -> nl .)
+    USE             reduce using rule 51 (spnl -> nl .)
+    GOTO            reduce using rule 51 (spnl -> nl .)
+    CALL            reduce using rule 51 (spnl -> nl .)
+    IF              reduce using rule 51 (spnl -> nl .)
+    STARS           reduce using rule 51 (spnl -> nl .)
 
 
 state 5
 
-    (49) spnl -> space .
+    (50) spnl -> space .
 
-    STRT            reduce using rule 49 (spnl -> space .)
-    $end            reduce using rule 49 (spnl -> space .)
-    }               reduce using rule 49 (spnl -> space .)
-    VARNAME         reduce using rule 49 (spnl -> space .)
-    {               reduce using rule 49 (spnl -> space .)
-    READ            reduce using rule 49 (spnl -> space .)
-    GOTO            reduce using rule 49 (spnl -> space .)
-    CALL            reduce using rule 49 (spnl -> space .)
-    IF              reduce using rule 49 (spnl -> space .)
-    STARS           reduce using rule 49 (spnl -> space .)
+    STRT            reduce using rule 50 (spnl -> space .)
+    $end            reduce using rule 50 (spnl -> space .)
+    }               reduce using rule 50 (spnl -> space .)
+    VARNAME         reduce using rule 50 (spnl -> space .)
+    {               reduce using rule 50 (spnl -> space .)
+    READ            reduce using rule 50 (spnl -> space .)
+    USE             reduce using rule 50 (spnl -> space .)
+    GOTO            reduce using rule 50 (spnl -> space .)
+    CALL            reduce using rule 50 (spnl -> space .)
+    IF              reduce using rule 50 (spnl -> space .)
+    STARS           reduce using rule 50 (spnl -> space .)
 
 
 state 6
@@ -228,6 +232,7 @@ state 6
     >               reduce using rule 2 (space -> SPACES .)
     !               reduce using rule 2 (space -> SPACES .)
     READ            reduce using rule 2 (space -> SPACES .)
+    USE             reduce using rule 2 (space -> SPACES .)
     GOTO            reduce using rule 2 (space -> SPACES .)
     CALL            reduce using rule 2 (space -> SPACES .)
     IF              reduce using rule 2 (space -> SPACES .)
@@ -235,29 +240,30 @@ state 6
 
 state 7
 
-    (34) nl -> NEWLINE .
+    (35) nl -> NEWLINE .
 
-    STRT            reduce using rule 34 (nl -> NEWLINE .)
-    VARNAME         reduce using rule 34 (nl -> NEWLINE .)
-    MAINCODE        reduce using rule 34 (nl -> NEWLINE .)
-    FUNCS           reduce using rule 34 (nl -> NEWLINE .)
-    }               reduce using rule 34 (nl -> NEWLINE .)
-    {               reduce using rule 34 (nl -> NEWLINE .)
-    READ            reduce using rule 34 (nl -> NEWLINE .)
-    GOTO            reduce using rule 34 (nl -> NEWLINE .)
-    CALL            reduce using rule 34 (nl -> NEWLINE .)
-    IF              reduce using rule 34 (nl -> NEWLINE .)
-    STARS           reduce using rule 34 (nl -> NEWLINE .)
+    STRT            reduce using rule 35 (nl -> NEWLINE .)
+    VARNAME         reduce using rule 35 (nl -> NEWLINE .)
+    MAINCODE        reduce using rule 35 (nl -> NEWLINE .)
+    FUNCS           reduce using rule 35 (nl -> NEWLINE .)
+    }               reduce using rule 35 (nl -> NEWLINE .)
+    {               reduce using rule 35 (nl -> NEWLINE .)
+    READ            reduce using rule 35 (nl -> NEWLINE .)
+    USE             reduce using rule 35 (nl -> NEWLINE .)
+    GOTO            reduce using rule 35 (nl -> NEWLINE .)
+    CALL            reduce using rule 35 (nl -> NEWLINE .)
+    IF              reduce using rule 35 (nl -> NEWLINE .)
+    STARS           reduce using rule 35 (nl -> NEWLINE .)
 
 
 state 8
 
-    (60) prog -> structs func . tac spnl
-    (47) func -> func . nl VARNAME funcparams spnl { spnl funcbody spnl }
-    (48) func -> func . nl VARNAME funcparams spnl { spnl }
-    (32) tac -> . nl MAINCODE :
-    (33) tac -> . tac stmtnl stmt
-    (34) nl -> . NEWLINE
+    (61) prog -> structs func . tac spnl
+    (48) func -> func . nl VARNAME funcparams spnl { spnl funcbody spnl }
+    (49) func -> func . nl VARNAME funcparams spnl { spnl }
+    (33) tac -> . nl MAINCODE :
+    (34) tac -> . tac stmtnl stmt
+    (35) nl -> . NEWLINE
 
     NEWLINE         shift and go to state 7
 
@@ -266,8 +272,8 @@ state 8
 
 state 9
 
-    (58) structs -> structs VARNAME . space { spnl declist spnl } nl
-    (59) structs -> structs VARNAME . space { spnl } nl
+    (59) structs -> structs VARNAME . space { spnl declist spnl } nl
+    (60) structs -> structs VARNAME . space { spnl } nl
     (1) space -> .
     (2) space -> . SPACES
 
@@ -278,28 +284,28 @@ state 9
 
 state 10
 
-    (46) func -> FUNCS . :
+    (47) func -> FUNCS . :
 
     :               shift and go to state 15
 
 
 state 11
 
-    (57) structs -> spnl STRT . : nl
+    (58) structs -> spnl STRT . : nl
 
     :               shift and go to state 16
 
 
 state 12
 
-    (60) prog -> structs func tac . spnl
-    (33) tac -> tac . stmtnl stmt
-    (49) spnl -> . space
-    (50) spnl -> . nl
-    (35) stmtnl -> . NEWLINE
+    (61) prog -> structs func tac . spnl
+    (34) tac -> tac . stmtnl stmt
+    (50) spnl -> . space
+    (51) spnl -> . nl
+    (36) stmtnl -> . NEWLINE
     (1) space -> .
     (2) space -> . SPACES
-    (34) nl -> . NEWLINE
+    (35) nl -> . NEWLINE
 
     NEWLINE         shift and go to state 19
     $end            reduce using rule 1 (space -> .)
@@ -312,9 +318,9 @@ state 12
 
 state 13
 
-    (47) func -> func nl . VARNAME funcparams spnl { spnl funcbody spnl }
-    (48) func -> func nl . VARNAME funcparams spnl { spnl }
-    (32) tac -> nl . MAINCODE :
+    (48) func -> func nl . VARNAME funcparams spnl { spnl funcbody spnl }
+    (49) func -> func nl . VARNAME funcparams spnl { spnl }
+    (33) tac -> nl . MAINCODE :
 
     VARNAME         shift and go to state 20
     MAINCODE        shift and go to state 21
@@ -322,23 +328,23 @@ state 13
 
 state 14
 
-    (58) structs -> structs VARNAME space . { spnl declist spnl } nl
-    (59) structs -> structs VARNAME space . { spnl } nl
+    (59) structs -> structs VARNAME space . { spnl declist spnl } nl
+    (60) structs -> structs VARNAME space . { spnl } nl
 
     {               shift and go to state 22
 
 
 state 15
 
-    (46) func -> FUNCS : .
+    (47) func -> FUNCS : .
 
-    NEWLINE         reduce using rule 46 (func -> FUNCS : .)
+    NEWLINE         reduce using rule 47 (func -> FUNCS : .)
 
 
 state 16
 
-    (57) structs -> spnl STRT : . nl
-    (34) nl -> . NEWLINE
+    (58) structs -> spnl STRT : . nl
+    (35) nl -> . NEWLINE
 
     NEWLINE         shift and go to state 7
 
@@ -346,23 +352,24 @@ state 16
 
 state 17
 
-    (60) prog -> structs func tac spnl .
+    (61) prog -> structs func tac spnl .
 
-    $end            reduce using rule 60 (prog -> structs func tac spnl .)
+    $end            reduce using rule 61 (prog -> structs func tac spnl .)
 
 
 state 18
 
-    (33) tac -> tac stmtnl . stmt
+    (34) tac -> tac stmtnl . stmt
     (23) stmt -> . vardec
     (24) stmt -> . lhs space = space rhs
     (25) stmt -> . VARNAME space = space rhs
     (26) stmt -> . VARNAME space = space MALLOC ( )
     (27) stmt -> . READ SPACES VARNAME
-    (28) stmt -> . GOTO SPACES NUMBER
-    (29) stmt -> . CALL SPACES VARNAME funcargs
-    (30) stmt -> . IF SPACES boolexp SPACES GOTO SPACES NUMBER
-    (31) stmt -> . IF SPACES VARNAME SPACES GOTO SPACES NUMBER
+    (28) stmt -> . USE SPACES VARNAME
+    (29) stmt -> . GOTO SPACES NUMBER
+    (30) stmt -> . CALL SPACES VARNAME funcargs
+    (31) stmt -> . IF SPACES boolexp SPACES GOTO SPACES NUMBER
+    (32) stmt -> . IF SPACES VARNAME SPACES GOTO SPACES NUMBER
     (21) vardec -> . VARNAME SPACES list
     (22) vardec -> . VARNAME STARS SPACES list
     (13) lhs -> . STARS VARNAME
@@ -371,10 +378,11 @@ state 18
 
     VARNAME         shift and go to state 27
     READ            shift and go to state 28
-    GOTO            shift and go to state 29
-    CALL            shift and go to state 30
-    IF              shift and go to state 31
-    STARS           shift and go to state 32
+    USE             shift and go to state 29
+    GOTO            shift and go to state 30
+    CALL            shift and go to state 31
+    IF              shift and go to state 32
+    STARS           shift and go to state 33
 
     stmt                           shift and go to state 24
     vardec                         shift and go to state 25
@@ -382,46 +390,47 @@ state 18
 
 state 19
 
-    (35) stmtnl -> NEWLINE .
-    (34) nl -> NEWLINE .
+    (36) stmtnl -> NEWLINE .
+    (35) nl -> NEWLINE .
 
-    VARNAME         reduce using rule 35 (stmtnl -> NEWLINE .)
-    READ            reduce using rule 35 (stmtnl -> NEWLINE .)
-    GOTO            reduce using rule 35 (stmtnl -> NEWLINE .)
-    CALL            reduce using rule 35 (stmtnl -> NEWLINE .)
-    IF              reduce using rule 35 (stmtnl -> NEWLINE .)
-    STARS           reduce using rule 35 (stmtnl -> NEWLINE .)
-    $end            reduce using rule 34 (nl -> NEWLINE .)
-    }               reduce using rule 34 (nl -> NEWLINE .)
+    VARNAME         reduce using rule 36 (stmtnl -> NEWLINE .)
+    READ            reduce using rule 36 (stmtnl -> NEWLINE .)
+    USE             reduce using rule 36 (stmtnl -> NEWLINE .)
+    GOTO            reduce using rule 36 (stmtnl -> NEWLINE .)
+    CALL            reduce using rule 36 (stmtnl -> NEWLINE .)
+    IF              reduce using rule 36 (stmtnl -> NEWLINE .)
+    STARS           reduce using rule 36 (stmtnl -> NEWLINE .)
+    $end            reduce using rule 35 (nl -> NEWLINE .)
+    }               reduce using rule 35 (nl -> NEWLINE .)
 
 
 state 20
 
-    (47) func -> func nl VARNAME . funcparams spnl { spnl funcbody spnl }
-    (48) func -> func nl VARNAME . funcparams spnl { spnl }
-    (44) funcparams -> . ( space )
-    (45) funcparams -> . ( space paramlist space )
+    (48) func -> func nl VARNAME . funcparams spnl { spnl funcbody spnl }
+    (49) func -> func nl VARNAME . funcparams spnl { spnl }
+    (45) funcparams -> . ( space )
+    (46) funcparams -> . ( space paramlist space )
 
-    (               shift and go to state 34
+    (               shift and go to state 35
 
-    funcparams                     shift and go to state 33
+    funcparams                     shift and go to state 34
 
 state 21
 
-    (32) tac -> nl MAINCODE . :
+    (33) tac -> nl MAINCODE . :
 
-    :               shift and go to state 35
+    :               shift and go to state 36
 
 
 state 22
 
-    (58) structs -> structs VARNAME space { . spnl declist spnl } nl
-    (59) structs -> structs VARNAME space { . spnl } nl
-    (49) spnl -> . space
-    (50) spnl -> . nl
+    (59) structs -> structs VARNAME space { . spnl declist spnl } nl
+    (60) structs -> structs VARNAME space { . spnl } nl
+    (50) spnl -> . space
+    (51) spnl -> . nl
     (1) space -> .
     (2) space -> . SPACES
-    (34) nl -> . NEWLINE
+    (35) nl -> . NEWLINE
 
     }               reduce using rule 1 (space -> .)
     VARNAME         reduce using rule 1 (space -> .)
@@ -429,24 +438,24 @@ state 22
     NEWLINE         shift and go to state 7
 
     space                          shift and go to state 5
-    spnl                           shift and go to state 36
+    spnl                           shift and go to state 37
     nl                             shift and go to state 4
 
 state 23
 
-    (57) structs -> spnl STRT : nl .
+    (58) structs -> spnl STRT : nl .
 
-    VARNAME         reduce using rule 57 (structs -> spnl STRT : nl .)
-    FUNCS           reduce using rule 57 (structs -> spnl STRT : nl .)
+    VARNAME         reduce using rule 58 (structs -> spnl STRT : nl .)
+    FUNCS           reduce using rule 58 (structs -> spnl STRT : nl .)
 
 
 state 24
 
-    (33) tac -> tac stmtnl stmt .
+    (34) tac -> tac stmtnl stmt .
 
-    NEWLINE         reduce using rule 33 (tac -> tac stmtnl stmt .)
-    SPACES          reduce using rule 33 (tac -> tac stmtnl stmt .)
-    $end            reduce using rule 33 (tac -> tac stmtnl stmt .)
+    NEWLINE         reduce using rule 34 (tac -> tac stmtnl stmt .)
+    SPACES          reduce using rule 34 (tac -> tac stmtnl stmt .)
+    $end            reduce using rule 34 (tac -> tac stmtnl stmt .)
 
 
 state 25
@@ -468,7 +477,7 @@ state 26
     =               reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 37
+    space                          shift and go to state 38
 
 state 27
 
@@ -481,72 +490,79 @@ state 27
     (1) space -> .
     (2) space -> . SPACES
 
-    SPACES          shift and go to state 39
-    STARS           shift and go to state 40
-    -               shift and go to state 41
-    .               shift and go to state 42
+    SPACES          shift and go to state 40
+    STARS           shift and go to state 41
+    -               shift and go to state 42
+    .               shift and go to state 43
     =               reduce using rule 1 (space -> .)
 
-    space                          shift and go to state 38
+    space                          shift and go to state 39
 
 state 28
 
     (27) stmt -> READ . SPACES VARNAME
 
-    SPACES          shift and go to state 43
+    SPACES          shift and go to state 44
 
 
 state 29
 
-    (28) stmt -> GOTO . SPACES NUMBER
-
-    SPACES          shift and go to state 44
-
-
-state 30
-
-    (29) stmt -> CALL . SPACES VARNAME funcargs
+    (28) stmt -> USE . SPACES VARNAME
 
     SPACES          shift and go to state 45
 
 
-state 31
+state 30
 
-    (30) stmt -> IF . SPACES boolexp SPACES GOTO SPACES NUMBER
-    (31) stmt -> IF . SPACES VARNAME SPACES GOTO SPACES NUMBER
+    (29) stmt -> GOTO . SPACES NUMBER
 
     SPACES          shift and go to state 46
 
 
+state 31
+
+    (30) stmt -> CALL . SPACES VARNAME funcargs
+
+    SPACES          shift and go to state 47
+
+
 state 32
 
-    (13) lhs -> STARS . VARNAME
+    (31) stmt -> IF . SPACES boolexp SPACES GOTO SPACES NUMBER
+    (32) stmt -> IF . SPACES VARNAME SPACES GOTO SPACES NUMBER
 
-    VARNAME         shift and go to state 47
+    SPACES          shift and go to state 48
 
 
 state 33
 
-    (47) func -> func nl VARNAME funcparams . spnl { spnl funcbody spnl }
-    (48) func -> func nl VARNAME funcparams . spnl { spnl }
-    (49) spnl -> . space
-    (50) spnl -> . nl
+    (13) lhs -> STARS . VARNAME
+
+    VARNAME         shift and go to state 49
+
+
+state 34
+
+    (48) func -> func nl VARNAME funcparams . spnl { spnl funcbody spnl }
+    (49) func -> func nl VARNAME funcparams . spnl { spnl }
+    (50) spnl -> . space
+    (51) spnl -> . nl
     (1) space -> .
     (2) space -> . SPACES
-    (34) nl -> . NEWLINE
+    (35) nl -> . NEWLINE
 
     {               reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
     NEWLINE         shift and go to state 7
 
     nl                             shift and go to state 4
-    spnl                           shift and go to state 48
+    spnl                           shift and go to state 50
     space                          shift and go to state 5
 
-state 34
+state 35
 
-    (44) funcparams -> ( . space )
-    (45) funcparams -> ( . space paramlist space )
+    (45) funcparams -> ( . space )
+    (46) funcparams -> ( . space paramlist space )
     (1) space -> .
     (2) space -> . SPACES
 
@@ -554,115 +570,122 @@ state 34
     VARNAME         reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 49
-
-state 35
-
-    (32) tac -> nl MAINCODE : .
-
-    NEWLINE         reduce using rule 32 (tac -> nl MAINCODE : .)
-    SPACES          reduce using rule 32 (tac -> nl MAINCODE : .)
-    $end            reduce using rule 32 (tac -> nl MAINCODE : .)
-
+    space                          shift and go to state 51
 
 state 36
 
-    (58) structs -> structs VARNAME space { spnl . declist spnl } nl
-    (59) structs -> structs VARNAME space { spnl . } nl
-    (53) declist -> . VARNAME SPACES list
-    (54) declist -> . VARNAME STARS SPACES list
-    (55) declist -> . declist nl VARNAME SPACES list
-    (56) declist -> . declist nl VARNAME STARS SPACES list
+    (33) tac -> nl MAINCODE : .
 
-    }               shift and go to state 52
-    VARNAME         shift and go to state 50
+    NEWLINE         reduce using rule 33 (tac -> nl MAINCODE : .)
+    SPACES          reduce using rule 33 (tac -> nl MAINCODE : .)
+    $end            reduce using rule 33 (tac -> nl MAINCODE : .)
 
-    declist                        shift and go to state 51
 
 state 37
 
-    (24) stmt -> lhs space . = space rhs
+    (59) structs -> structs VARNAME space { spnl . declist spnl } nl
+    (60) structs -> structs VARNAME space { spnl . } nl
+    (54) declist -> . VARNAME SPACES list
+    (55) declist -> . VARNAME STARS SPACES list
+    (56) declist -> . declist nl VARNAME SPACES list
+    (57) declist -> . declist nl VARNAME STARS SPACES list
 
-    =               shift and go to state 53
+    }               shift and go to state 54
+    VARNAME         shift and go to state 52
 
+    declist                        shift and go to state 53
 
 state 38
 
-    (25) stmt -> VARNAME space . = space rhs
-    (26) stmt -> VARNAME space . = space MALLOC ( )
+    (24) stmt -> lhs space . = space rhs
 
-    =               shift and go to state 54
+    =               shift and go to state 55
 
 
 state 39
 
-    (21) vardec -> VARNAME SPACES . list
-    (2) space -> SPACES .
-    (51) list -> . VARNAME space
-    (52) list -> . list , space VARNAME space
+    (25) stmt -> VARNAME space . = space rhs
+    (26) stmt -> VARNAME space . = space MALLOC ( )
 
-    =               reduce using rule 2 (space -> SPACES .)
-    VARNAME         shift and go to state 55
+    =               shift and go to state 56
 
-    list                           shift and go to state 56
 
 state 40
 
-    (22) vardec -> VARNAME STARS . SPACES list
+    (21) vardec -> VARNAME SPACES . list
+    (2) space -> SPACES .
+    (52) list -> . VARNAME space
+    (53) list -> . list , space VARNAME space
 
-    SPACES          shift and go to state 57
+    =               reduce using rule 2 (space -> SPACES .)
+    VARNAME         shift and go to state 57
 
+    list                           shift and go to state 58
 
 state 41
 
-    (14) lhs -> VARNAME - . > VARNAME
+    (22) vardec -> VARNAME STARS . SPACES list
 
-    >               shift and go to state 58
+    SPACES          shift and go to state 59
 
 
 state 42
 
-    (15) lhs -> VARNAME . . VARNAME
+    (14) lhs -> VARNAME - . > VARNAME
 
-    VARNAME         shift and go to state 59
+    >               shift and go to state 60
 
 
 state 43
 
-    (27) stmt -> READ SPACES . VARNAME
+    (15) lhs -> VARNAME . . VARNAME
 
-    VARNAME         shift and go to state 60
+    VARNAME         shift and go to state 61
 
 
 state 44
 
-    (28) stmt -> GOTO SPACES . NUMBER
-
-    NUMBER          shift and go to state 61
-
-
-state 45
-
-    (29) stmt -> CALL SPACES . VARNAME funcargs
+    (27) stmt -> READ SPACES . VARNAME
 
     VARNAME         shift and go to state 62
 
 
+state 45
+
+    (28) stmt -> USE SPACES . VARNAME
+
+    VARNAME         shift and go to state 63
+
+
 state 46
 
-    (30) stmt -> IF SPACES . boolexp SPACES GOTO SPACES NUMBER
-    (31) stmt -> IF SPACES . VARNAME SPACES GOTO SPACES NUMBER
+    (29) stmt -> GOTO SPACES . NUMBER
+
+    NUMBER          shift and go to state 64
+
+
+state 47
+
+    (30) stmt -> CALL SPACES . VARNAME funcargs
+
+    VARNAME         shift and go to state 65
+
+
+state 48
+
+    (31) stmt -> IF SPACES . boolexp SPACES GOTO SPACES NUMBER
+    (32) stmt -> IF SPACES . VARNAME SPACES GOTO SPACES NUMBER
     (9) boolexp -> . VARNAME boolop VARNAME
     (10) boolexp -> . VARNAME boolop NUMBER
     (11) boolexp -> . NUMBER boolop VARNAME
     (12) boolexp -> . NUMBER boolop NUMBER
 
-    VARNAME         shift and go to state 65
-    NUMBER          shift and go to state 64
+    VARNAME         shift and go to state 68
+    NUMBER          shift and go to state 67
 
-    boolexp                        shift and go to state 63
+    boolexp                        shift and go to state 66
 
-state 47
+state 49
 
     (13) lhs -> STARS VARNAME .
 
@@ -673,43 +696,43 @@ state 47
     }               reduce using rule 13 (lhs -> STARS VARNAME .)
 
 
-state 48
-
-    (47) func -> func nl VARNAME funcparams spnl . { spnl funcbody spnl }
-    (48) func -> func nl VARNAME funcparams spnl . { spnl }
-
-    {               shift and go to state 66
-
-
-state 49
-
-    (44) funcparams -> ( space . )
-    (45) funcparams -> ( space . paramlist space )
-    (42) paramlist -> . VARNAME SPACES VARNAME
-    (43) paramlist -> . paramlist space , space VARNAME SPACES VARNAME
-
-    )               shift and go to state 67
-    VARNAME         shift and go to state 69
-
-    paramlist                      shift and go to state 68
-
 state 50
 
-    (53) declist -> VARNAME . SPACES list
-    (54) declist -> VARNAME . STARS SPACES list
+    (48) func -> func nl VARNAME funcparams spnl . { spnl funcbody spnl }
+    (49) func -> func nl VARNAME funcparams spnl . { spnl }
 
-    SPACES          shift and go to state 70
-    STARS           shift and go to state 71
+    {               shift and go to state 69
 
 
 state 51
 
-    (58) structs -> structs VARNAME space { spnl declist . spnl } nl
-    (55) declist -> declist . nl VARNAME SPACES list
-    (56) declist -> declist . nl VARNAME STARS SPACES list
-    (49) spnl -> . space
-    (50) spnl -> . nl
-    (34) nl -> . NEWLINE
+    (45) funcparams -> ( space . )
+    (46) funcparams -> ( space . paramlist space )
+    (43) paramlist -> . VARNAME SPACES VARNAME
+    (44) paramlist -> . paramlist space , space VARNAME SPACES VARNAME
+
+    )               shift and go to state 70
+    VARNAME         shift and go to state 72
+
+    paramlist                      shift and go to state 71
+
+state 52
+
+    (54) declist -> VARNAME . SPACES list
+    (55) declist -> VARNAME . STARS SPACES list
+
+    SPACES          shift and go to state 73
+    STARS           shift and go to state 74
+
+
+state 53
+
+    (59) structs -> structs VARNAME space { spnl declist . spnl } nl
+    (56) declist -> declist . nl VARNAME SPACES list
+    (57) declist -> declist . nl VARNAME STARS SPACES list
+    (50) spnl -> . space
+    (51) spnl -> . nl
+    (35) nl -> . NEWLINE
     (1) space -> .
     (2) space -> . SPACES
 
@@ -718,19 +741,19 @@ state 51
     SPACES          shift and go to state 6
 
     space                          shift and go to state 5
-    spnl                           shift and go to state 72
-    nl                             shift and go to state 73
+    spnl                           shift and go to state 75
+    nl                             shift and go to state 76
 
-state 52
+state 54
 
-    (59) structs -> structs VARNAME space { spnl } . nl
-    (34) nl -> . NEWLINE
+    (60) structs -> structs VARNAME space { spnl } . nl
+    (35) nl -> . NEWLINE
 
     NEWLINE         shift and go to state 7
 
-    nl                             shift and go to state 74
+    nl                             shift and go to state 77
 
-state 53
+state 55
 
     (24) stmt -> lhs space = . space rhs
     (1) space -> .
@@ -742,9 +765,9 @@ state 53
     STARS           reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 75
+    space                          shift and go to state 78
 
-state 54
+state 56
 
     (25) stmt -> VARNAME space = . space rhs
     (26) stmt -> VARNAME space = . space MALLOC ( )
@@ -758,11 +781,11 @@ state 54
     STARS           reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 76
+    space                          shift and go to state 79
 
-state 55
+state 57
 
-    (51) list -> VARNAME . space
+    (52) list -> VARNAME . space
     (1) space -> .
     (2) space -> . SPACES
 
@@ -774,38 +797,38 @@ state 55
 
   ! SPACES          [ shift and go to state 6 ]
 
-    space                          shift and go to state 77
+    space                          shift and go to state 80
 
-state 56
+state 58
 
     (21) vardec -> VARNAME SPACES list .
-    (52) list -> list . , space VARNAME space
+    (53) list -> list . , space VARNAME space
 
     NEWLINE         reduce using rule 21 (vardec -> VARNAME SPACES list .)
     SPACES          reduce using rule 21 (vardec -> VARNAME SPACES list .)
     $end            reduce using rule 21 (vardec -> VARNAME SPACES list .)
     }               reduce using rule 21 (vardec -> VARNAME SPACES list .)
-    ,               shift and go to state 78
-
-
-state 57
-
-    (22) vardec -> VARNAME STARS SPACES . list
-    (51) list -> . VARNAME space
-    (52) list -> . list , space VARNAME space
-
-    VARNAME         shift and go to state 55
-
-    list                           shift and go to state 79
-
-state 58
-
-    (14) lhs -> VARNAME - > . VARNAME
-
-    VARNAME         shift and go to state 80
+    ,               shift and go to state 81
 
 
 state 59
+
+    (22) vardec -> VARNAME STARS SPACES . list
+    (52) list -> . VARNAME space
+    (53) list -> . list , space VARNAME space
+
+    VARNAME         shift and go to state 57
+
+    list                           shift and go to state 82
+
+state 60
+
+    (14) lhs -> VARNAME - > . VARNAME
+
+    VARNAME         shift and go to state 83
+
+
+state 61
 
     (15) lhs -> VARNAME . VARNAME .
 
@@ -816,7 +839,7 @@ state 59
     }               reduce using rule 15 (lhs -> VARNAME . VARNAME .)
 
 
-state 60
+state 62
 
     (27) stmt -> READ SPACES VARNAME .
 
@@ -826,34 +849,44 @@ state 60
     }               reduce using rule 27 (stmt -> READ SPACES VARNAME .)
 
 
-state 61
-
-    (28) stmt -> GOTO SPACES NUMBER .
-
-    NEWLINE         reduce using rule 28 (stmt -> GOTO SPACES NUMBER .)
-    SPACES          reduce using rule 28 (stmt -> GOTO SPACES NUMBER .)
-    $end            reduce using rule 28 (stmt -> GOTO SPACES NUMBER .)
-    }               reduce using rule 28 (stmt -> GOTO SPACES NUMBER .)
-
-
-state 62
-
-    (29) stmt -> CALL SPACES VARNAME . funcargs
-    (40) funcargs -> . ( space )
-    (41) funcargs -> . ( space arglist space )
-
-    (               shift and go to state 82
-
-    funcargs                       shift and go to state 81
-
 state 63
 
-    (30) stmt -> IF SPACES boolexp . SPACES GOTO SPACES NUMBER
+    (28) stmt -> USE SPACES VARNAME .
 
-    SPACES          shift and go to state 83
+    NEWLINE         reduce using rule 28 (stmt -> USE SPACES VARNAME .)
+    SPACES          reduce using rule 28 (stmt -> USE SPACES VARNAME .)
+    $end            reduce using rule 28 (stmt -> USE SPACES VARNAME .)
+    }               reduce using rule 28 (stmt -> USE SPACES VARNAME .)
 
 
 state 64
+
+    (29) stmt -> GOTO SPACES NUMBER .
+
+    NEWLINE         reduce using rule 29 (stmt -> GOTO SPACES NUMBER .)
+    SPACES          reduce using rule 29 (stmt -> GOTO SPACES NUMBER .)
+    $end            reduce using rule 29 (stmt -> GOTO SPACES NUMBER .)
+    }               reduce using rule 29 (stmt -> GOTO SPACES NUMBER .)
+
+
+state 65
+
+    (30) stmt -> CALL SPACES VARNAME . funcargs
+    (41) funcargs -> . ( space )
+    (42) funcargs -> . ( space arglist space )
+
+    (               shift and go to state 85
+
+    funcargs                       shift and go to state 84
+
+state 66
+
+    (31) stmt -> IF SPACES boolexp . SPACES GOTO SPACES NUMBER
+
+    SPACES          shift and go to state 86
+
+
+state 67
 
     (11) boolexp -> NUMBER . boolop VARNAME
     (12) boolexp -> NUMBER . boolop NUMBER
@@ -874,12 +907,12 @@ state 64
     !               reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    boolop                         shift and go to state 84
-    space                          shift and go to state 85
+    boolop                         shift and go to state 87
+    space                          shift and go to state 88
 
-state 65
+state 68
 
-    (31) stmt -> IF SPACES VARNAME . SPACES GOTO SPACES NUMBER
+    (32) stmt -> IF SPACES VARNAME . SPACES GOTO SPACES NUMBER
     (9) boolexp -> VARNAME . boolop VARNAME
     (10) boolexp -> VARNAME . boolop NUMBER
     (3) boolop -> . space LTE space
@@ -891,7 +924,7 @@ state 65
     (1) space -> .
     (2) space -> . SPACES
 
-    SPACES          shift and go to state 86
+    SPACES          shift and go to state 89
     LTE             reduce using rule 1 (space -> .)
     GTE             reduce using rule 1 (space -> .)
     <               reduce using rule 1 (space -> .)
@@ -899,22 +932,23 @@ state 65
     =               reduce using rule 1 (space -> .)
     !               reduce using rule 1 (space -> .)
 
-    boolop                         shift and go to state 87
-    space                          shift and go to state 85
+    boolop                         shift and go to state 90
+    space                          shift and go to state 88
 
-state 66
+state 69
 
-    (47) func -> func nl VARNAME funcparams spnl { . spnl funcbody spnl }
-    (48) func -> func nl VARNAME funcparams spnl { . spnl }
-    (49) spnl -> . space
-    (50) spnl -> . nl
+    (48) func -> func nl VARNAME funcparams spnl { . spnl funcbody spnl }
+    (49) func -> func nl VARNAME funcparams spnl { . spnl }
+    (50) spnl -> . space
+    (51) spnl -> . nl
     (1) space -> .
     (2) space -> . SPACES
-    (34) nl -> . NEWLINE
+    (35) nl -> . NEWLINE
 
     }               reduce using rule 1 (space -> .)
     VARNAME         reduce using rule 1 (space -> .)
     READ            reduce using rule 1 (space -> .)
+    USE             reduce using rule 1 (space -> .)
     GOTO            reduce using rule 1 (space -> .)
     CALL            reduce using rule 1 (space -> .)
     IF              reduce using rule 1 (space -> .)
@@ -923,22 +957,22 @@ state 66
     NEWLINE         shift and go to state 7
 
     nl                             shift and go to state 4
-    spnl                           shift and go to state 88
+    spnl                           shift and go to state 91
     space                          shift and go to state 5
 
-state 67
+state 70
 
-    (44) funcparams -> ( space ) .
+    (45) funcparams -> ( space ) .
 
-    SPACES          reduce using rule 44 (funcparams -> ( space ) .)
-    NEWLINE         reduce using rule 44 (funcparams -> ( space ) .)
-    {               reduce using rule 44 (funcparams -> ( space ) .)
+    SPACES          reduce using rule 45 (funcparams -> ( space ) .)
+    NEWLINE         reduce using rule 45 (funcparams -> ( space ) .)
+    {               reduce using rule 45 (funcparams -> ( space ) .)
 
 
-state 68
+state 71
 
-    (45) funcparams -> ( space paramlist . space )
-    (43) paramlist -> paramlist . space , space VARNAME SPACES VARNAME
+    (46) funcparams -> ( space paramlist . space )
+    (44) paramlist -> paramlist . space , space VARNAME SPACES VARNAME
     (1) space -> .
     (2) space -> . SPACES
 
@@ -946,58 +980,58 @@ state 68
     ,               reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 89
-
-state 69
-
-    (42) paramlist -> VARNAME . SPACES VARNAME
-
-    SPACES          shift and go to state 90
-
-
-state 70
-
-    (53) declist -> VARNAME SPACES . list
-    (51) list -> . VARNAME space
-    (52) list -> . list , space VARNAME space
-
-    VARNAME         shift and go to state 55
-
-    list                           shift and go to state 91
-
-state 71
-
-    (54) declist -> VARNAME STARS . SPACES list
-
-    SPACES          shift and go to state 92
-
+    space                          shift and go to state 92
 
 state 72
 
-    (58) structs -> structs VARNAME space { spnl declist spnl . } nl
+    (43) paramlist -> VARNAME . SPACES VARNAME
 
-    }               shift and go to state 93
+    SPACES          shift and go to state 93
 
 
 state 73
 
-    (55) declist -> declist nl . VARNAME SPACES list
-    (56) declist -> declist nl . VARNAME STARS SPACES list
-    (50) spnl -> nl .
+    (54) declist -> VARNAME SPACES . list
+    (52) list -> . VARNAME space
+    (53) list -> . list , space VARNAME space
 
-    VARNAME         shift and go to state 94
-    }               reduce using rule 50 (spnl -> nl .)
+    VARNAME         shift and go to state 57
 
+    list                           shift and go to state 94
 
 state 74
 
-    (59) structs -> structs VARNAME space { spnl } nl .
+    (55) declist -> VARNAME STARS . SPACES list
 
-    VARNAME         reduce using rule 59 (structs -> structs VARNAME space { spnl } nl .)
-    FUNCS           reduce using rule 59 (structs -> structs VARNAME space { spnl } nl .)
+    SPACES          shift and go to state 95
 
 
 state 75
+
+    (59) structs -> structs VARNAME space { spnl declist spnl . } nl
+
+    }               shift and go to state 96
+
+
+state 76
+
+    (56) declist -> declist nl . VARNAME SPACES list
+    (57) declist -> declist nl . VARNAME STARS SPACES list
+    (51) spnl -> nl .
+
+    VARNAME         shift and go to state 97
+    }               reduce using rule 51 (spnl -> nl .)
+
+
+state 77
+
+    (60) structs -> structs VARNAME space { spnl } nl .
+
+    VARNAME         reduce using rule 60 (structs -> structs VARNAME space { spnl } nl .)
+    FUNCS           reduce using rule 60 (structs -> structs VARNAME space { spnl } nl .)
+
+
+state 78
 
     (24) stmt -> lhs space = space . rhs
     (16) rhs -> . boolexp
@@ -1013,16 +1047,16 @@ state 75
     (14) lhs -> . VARNAME - > VARNAME
     (15) lhs -> . VARNAME . VARNAME
 
-    VARNAME         shift and go to state 98
-    &               shift and go to state 99
-    NUMBER          shift and go to state 100
-    STARS           shift and go to state 32
+    VARNAME         shift and go to state 101
+    &               shift and go to state 102
+    NUMBER          shift and go to state 103
+    STARS           shift and go to state 33
 
-    lhs                            shift and go to state 95
-    rhs                            shift and go to state 96
-    boolexp                        shift and go to state 97
+    lhs                            shift and go to state 98
+    rhs                            shift and go to state 99
+    boolexp                        shift and go to state 100
 
-state 76
+state 79
 
     (25) stmt -> VARNAME space = space . rhs
     (26) stmt -> VARNAME space = space . MALLOC ( )
@@ -1039,51 +1073,51 @@ state 76
     (14) lhs -> . VARNAME - > VARNAME
     (15) lhs -> . VARNAME . VARNAME
 
-    MALLOC          shift and go to state 102
-    VARNAME         shift and go to state 98
-    &               shift and go to state 99
-    NUMBER          shift and go to state 100
-    STARS           shift and go to state 32
+    MALLOC          shift and go to state 105
+    VARNAME         shift and go to state 101
+    &               shift and go to state 102
+    NUMBER          shift and go to state 103
+    STARS           shift and go to state 33
 
-    rhs                            shift and go to state 101
-    boolexp                        shift and go to state 97
-    lhs                            shift and go to state 95
+    rhs                            shift and go to state 104
+    boolexp                        shift and go to state 100
+    lhs                            shift and go to state 98
 
-state 77
+state 80
 
-    (51) list -> VARNAME space .
+    (52) list -> VARNAME space .
 
-    ,               reduce using rule 51 (list -> VARNAME space .)
-    NEWLINE         reduce using rule 51 (list -> VARNAME space .)
-    SPACES          reduce using rule 51 (list -> VARNAME space .)
-    $end            reduce using rule 51 (list -> VARNAME space .)
-    }               reduce using rule 51 (list -> VARNAME space .)
+    ,               reduce using rule 52 (list -> VARNAME space .)
+    NEWLINE         reduce using rule 52 (list -> VARNAME space .)
+    SPACES          reduce using rule 52 (list -> VARNAME space .)
+    $end            reduce using rule 52 (list -> VARNAME space .)
+    }               reduce using rule 52 (list -> VARNAME space .)
 
 
-state 78
+state 81
 
-    (52) list -> list , . space VARNAME space
+    (53) list -> list , . space VARNAME space
     (1) space -> .
     (2) space -> . SPACES
 
     VARNAME         reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 103
+    space                          shift and go to state 106
 
-state 79
+state 82
 
     (22) vardec -> VARNAME STARS SPACES list .
-    (52) list -> list . , space VARNAME space
+    (53) list -> list . , space VARNAME space
 
     NEWLINE         reduce using rule 22 (vardec -> VARNAME STARS SPACES list .)
     SPACES          reduce using rule 22 (vardec -> VARNAME STARS SPACES list .)
     $end            reduce using rule 22 (vardec -> VARNAME STARS SPACES list .)
     }               reduce using rule 22 (vardec -> VARNAME STARS SPACES list .)
-    ,               shift and go to state 78
+    ,               shift and go to state 81
 
 
-state 80
+state 83
 
     (14) lhs -> VARNAME - > VARNAME .
 
@@ -1094,20 +1128,20 @@ state 80
     }               reduce using rule 14 (lhs -> VARNAME - > VARNAME .)
 
 
-state 81
+state 84
 
-    (29) stmt -> CALL SPACES VARNAME funcargs .
+    (30) stmt -> CALL SPACES VARNAME funcargs .
 
-    NEWLINE         reduce using rule 29 (stmt -> CALL SPACES VARNAME funcargs .)
-    SPACES          reduce using rule 29 (stmt -> CALL SPACES VARNAME funcargs .)
-    $end            reduce using rule 29 (stmt -> CALL SPACES VARNAME funcargs .)
-    }               reduce using rule 29 (stmt -> CALL SPACES VARNAME funcargs .)
+    NEWLINE         reduce using rule 30 (stmt -> CALL SPACES VARNAME funcargs .)
+    SPACES          reduce using rule 30 (stmt -> CALL SPACES VARNAME funcargs .)
+    $end            reduce using rule 30 (stmt -> CALL SPACES VARNAME funcargs .)
+    }               reduce using rule 30 (stmt -> CALL SPACES VARNAME funcargs .)
 
 
-state 82
+state 85
 
-    (40) funcargs -> ( . space )
-    (41) funcargs -> ( . space arglist space )
+    (41) funcargs -> ( . space )
+    (42) funcargs -> ( . space arglist space )
     (1) space -> .
     (2) space -> . SPACES
 
@@ -1115,25 +1149,25 @@ state 82
     VARNAME         reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 104
+    space                          shift and go to state 107
 
-state 83
+state 86
 
-    (30) stmt -> IF SPACES boolexp SPACES . GOTO SPACES NUMBER
+    (31) stmt -> IF SPACES boolexp SPACES . GOTO SPACES NUMBER
 
-    GOTO            shift and go to state 105
+    GOTO            shift and go to state 108
 
 
-state 84
+state 87
 
     (11) boolexp -> NUMBER boolop . VARNAME
     (12) boolexp -> NUMBER boolop . NUMBER
 
-    VARNAME         shift and go to state 107
-    NUMBER          shift and go to state 106
+    VARNAME         shift and go to state 110
+    NUMBER          shift and go to state 109
 
 
-state 85
+state 88
 
     (3) boolop -> space . LTE space
     (4) boolop -> space . GTE space
@@ -1142,20 +1176,20 @@ state 85
     (7) boolop -> space . = = space
     (8) boolop -> space . ! = space
 
-    LTE             shift and go to state 108
-    GTE             shift and go to state 109
-    <               shift and go to state 110
-    >               shift and go to state 111
-    =               shift and go to state 112
-    !               shift and go to state 113
+    LTE             shift and go to state 111
+    GTE             shift and go to state 112
+    <               shift and go to state 113
+    >               shift and go to state 114
+    =               shift and go to state 115
+    !               shift and go to state 116
 
 
-state 86
+state 89
 
-    (31) stmt -> IF SPACES VARNAME SPACES . GOTO SPACES NUMBER
+    (32) stmt -> IF SPACES VARNAME SPACES . GOTO SPACES NUMBER
     (2) space -> SPACES .
 
-    GOTO            shift and go to state 114
+    GOTO            shift and go to state 117
     LTE             reduce using rule 2 (space -> SPACES .)
     GTE             reduce using rule 2 (space -> SPACES .)
     <               reduce using rule 2 (space -> SPACES .)
@@ -1164,105 +1198,107 @@ state 86
     !               reduce using rule 2 (space -> SPACES .)
 
 
-state 87
+state 90
 
     (9) boolexp -> VARNAME boolop . VARNAME
     (10) boolexp -> VARNAME boolop . NUMBER
 
-    VARNAME         shift and go to state 115
-    NUMBER          shift and go to state 116
+    VARNAME         shift and go to state 118
+    NUMBER          shift and go to state 119
 
 
-state 88
+state 91
 
-    (47) func -> func nl VARNAME funcparams spnl { spnl . funcbody spnl }
-    (48) func -> func nl VARNAME funcparams spnl { spnl . }
-    (36) funcbody -> . stmt
-    (37) funcbody -> . funcbody stmtnl stmt
+    (48) func -> func nl VARNAME funcparams spnl { spnl . funcbody spnl }
+    (49) func -> func nl VARNAME funcparams spnl { spnl . }
+    (37) funcbody -> . stmt
+    (38) funcbody -> . funcbody stmtnl stmt
     (23) stmt -> . vardec
     (24) stmt -> . lhs space = space rhs
     (25) stmt -> . VARNAME space = space rhs
     (26) stmt -> . VARNAME space = space MALLOC ( )
     (27) stmt -> . READ SPACES VARNAME
-    (28) stmt -> . GOTO SPACES NUMBER
-    (29) stmt -> . CALL SPACES VARNAME funcargs
-    (30) stmt -> . IF SPACES boolexp SPACES GOTO SPACES NUMBER
-    (31) stmt -> . IF SPACES VARNAME SPACES GOTO SPACES NUMBER
+    (28) stmt -> . USE SPACES VARNAME
+    (29) stmt -> . GOTO SPACES NUMBER
+    (30) stmt -> . CALL SPACES VARNAME funcargs
+    (31) stmt -> . IF SPACES boolexp SPACES GOTO SPACES NUMBER
+    (32) stmt -> . IF SPACES VARNAME SPACES GOTO SPACES NUMBER
     (21) vardec -> . VARNAME SPACES list
     (22) vardec -> . VARNAME STARS SPACES list
     (13) lhs -> . STARS VARNAME
     (14) lhs -> . VARNAME - > VARNAME
     (15) lhs -> . VARNAME . VARNAME
 
-    }               shift and go to state 118
+    }               shift and go to state 121
     VARNAME         shift and go to state 27
     READ            shift and go to state 28
-    GOTO            shift and go to state 29
-    CALL            shift and go to state 30
-    IF              shift and go to state 31
-    STARS           shift and go to state 32
+    USE             shift and go to state 29
+    GOTO            shift and go to state 30
+    CALL            shift and go to state 31
+    IF              shift and go to state 32
+    STARS           shift and go to state 33
 
-    funcbody                       shift and go to state 117
-    stmt                           shift and go to state 119
+    funcbody                       shift and go to state 120
+    stmt                           shift and go to state 122
     vardec                         shift and go to state 25
     lhs                            shift and go to state 26
 
-state 89
-
-    (45) funcparams -> ( space paramlist space . )
-    (43) paramlist -> paramlist space . , space VARNAME SPACES VARNAME
-
-    )               shift and go to state 120
-    ,               shift and go to state 121
-
-
-state 90
-
-    (42) paramlist -> VARNAME SPACES . VARNAME
-
-    VARNAME         shift and go to state 122
-
-
-state 91
-
-    (53) declist -> VARNAME SPACES list .
-    (52) list -> list . , space VARNAME space
-
-    NEWLINE         reduce using rule 53 (declist -> VARNAME SPACES list .)
-    SPACES          reduce using rule 53 (declist -> VARNAME SPACES list .)
-    }               reduce using rule 53 (declist -> VARNAME SPACES list .)
-    ,               shift and go to state 78
-
-
 state 92
 
-    (54) declist -> VARNAME STARS SPACES . list
-    (51) list -> . VARNAME space
-    (52) list -> . list , space VARNAME space
+    (46) funcparams -> ( space paramlist space . )
+    (44) paramlist -> paramlist space . , space VARNAME SPACES VARNAME
 
-    VARNAME         shift and go to state 55
+    )               shift and go to state 123
+    ,               shift and go to state 124
 
-    list                           shift and go to state 123
 
 state 93
 
-    (58) structs -> structs VARNAME space { spnl declist spnl } . nl
-    (34) nl -> . NEWLINE
+    (43) paramlist -> VARNAME SPACES . VARNAME
 
-    NEWLINE         shift and go to state 7
+    VARNAME         shift and go to state 125
 
-    nl                             shift and go to state 124
 
 state 94
 
-    (55) declist -> declist nl VARNAME . SPACES list
-    (56) declist -> declist nl VARNAME . STARS SPACES list
+    (54) declist -> VARNAME SPACES list .
+    (53) list -> list . , space VARNAME space
 
-    SPACES          shift and go to state 125
-    STARS           shift and go to state 126
+    NEWLINE         reduce using rule 54 (declist -> VARNAME SPACES list .)
+    SPACES          reduce using rule 54 (declist -> VARNAME SPACES list .)
+    }               reduce using rule 54 (declist -> VARNAME SPACES list .)
+    ,               shift and go to state 81
 
 
 state 95
+
+    (55) declist -> VARNAME STARS SPACES . list
+    (52) list -> . VARNAME space
+    (53) list -> . list , space VARNAME space
+
+    VARNAME         shift and go to state 57
+
+    list                           shift and go to state 126
+
+state 96
+
+    (59) structs -> structs VARNAME space { spnl declist spnl } . nl
+    (35) nl -> . NEWLINE
+
+    NEWLINE         shift and go to state 7
+
+    nl                             shift and go to state 127
+
+state 97
+
+    (56) declist -> declist nl VARNAME . SPACES list
+    (57) declist -> declist nl VARNAME . STARS SPACES list
+
+    SPACES          shift and go to state 128
+    STARS           shift and go to state 129
+
+
+state 98
 
     (17) rhs -> lhs .
 
@@ -1272,7 +1308,7 @@ state 95
     }               reduce using rule 17 (rhs -> lhs .)
 
 
-state 96
+state 99
 
     (24) stmt -> lhs space = space rhs .
 
@@ -1282,7 +1318,7 @@ state 96
     }               reduce using rule 24 (stmt -> lhs space = space rhs .)
 
 
-state 97
+state 100
 
     (16) rhs -> boolexp .
 
@@ -1292,7 +1328,7 @@ state 97
     }               reduce using rule 16 (rhs -> boolexp .)
 
 
-state 98
+state 101
 
     (18) rhs -> VARNAME .
     (9) boolexp -> VARNAME . boolop VARNAME
@@ -1312,8 +1348,8 @@ state 98
     SPACES          reduce using rule 18 (rhs -> VARNAME .)
     $end            reduce using rule 18 (rhs -> VARNAME .)
     }               reduce using rule 18 (rhs -> VARNAME .)
-    -               shift and go to state 41
-    .               shift and go to state 42
+    -               shift and go to state 42
+    .               shift and go to state 43
     LTE             reduce using rule 1 (space -> .)
     GTE             reduce using rule 1 (space -> .)
     <               reduce using rule 1 (space -> .)
@@ -1323,17 +1359,17 @@ state 98
 
   ! SPACES          [ shift and go to state 6 ]
 
-    boolop                         shift and go to state 87
-    space                          shift and go to state 85
+    boolop                         shift and go to state 90
+    space                          shift and go to state 88
 
-state 99
+state 102
 
     (19) rhs -> & . VARNAME
 
-    VARNAME         shift and go to state 127
+    VARNAME         shift and go to state 130
 
 
-state 100
+state 103
 
     (20) rhs -> NUMBER .
     (11) boolexp -> NUMBER . boolop VARNAME
@@ -1360,10 +1396,10 @@ state 100
 
   ! SPACES          [ shift and go to state 6 ]
 
-    boolop                         shift and go to state 84
-    space                          shift and go to state 85
+    boolop                         shift and go to state 87
+    space                          shift and go to state 88
 
-state 101
+state 104
 
     (25) stmt -> VARNAME space = space rhs .
 
@@ -1373,40 +1409,40 @@ state 101
     }               reduce using rule 25 (stmt -> VARNAME space = space rhs .)
 
 
-state 102
+state 105
 
     (26) stmt -> VARNAME space = space MALLOC . ( )
 
-    (               shift and go to state 128
-
-
-state 103
-
-    (52) list -> list , space . VARNAME space
-
-    VARNAME         shift and go to state 129
-
-
-state 104
-
-    (40) funcargs -> ( space . )
-    (41) funcargs -> ( space . arglist space )
-    (38) arglist -> . VARNAME
-    (39) arglist -> . arglist space , space VARNAME
-
-    )               shift and go to state 130
-    VARNAME         shift and go to state 132
-
-    arglist                        shift and go to state 131
-
-state 105
-
-    (30) stmt -> IF SPACES boolexp SPACES GOTO . SPACES NUMBER
-
-    SPACES          shift and go to state 133
+    (               shift and go to state 131
 
 
 state 106
+
+    (53) list -> list , space . VARNAME space
+
+    VARNAME         shift and go to state 132
+
+
+state 107
+
+    (41) funcargs -> ( space . )
+    (42) funcargs -> ( space . arglist space )
+    (39) arglist -> . VARNAME
+    (40) arglist -> . arglist space , space VARNAME
+
+    )               shift and go to state 133
+    VARNAME         shift and go to state 135
+
+    arglist                        shift and go to state 134
+
+state 108
+
+    (31) stmt -> IF SPACES boolexp SPACES GOTO . SPACES NUMBER
+
+    SPACES          shift and go to state 136
+
+
+state 109
 
     (12) boolexp -> NUMBER boolop NUMBER .
 
@@ -1416,7 +1452,7 @@ state 106
     }               reduce using rule 12 (boolexp -> NUMBER boolop NUMBER .)
 
 
-state 107
+state 110
 
     (11) boolexp -> NUMBER boolop VARNAME .
 
@@ -1426,45 +1462,9 @@ state 107
     }               reduce using rule 11 (boolexp -> NUMBER boolop VARNAME .)
 
 
-state 108
-
-    (3) boolop -> space LTE . space
-    (1) space -> .
-    (2) space -> . SPACES
-
-    VARNAME         reduce using rule 1 (space -> .)
-    NUMBER          reduce using rule 1 (space -> .)
-    SPACES          shift and go to state 6
-
-    space                          shift and go to state 134
-
-state 109
-
-    (4) boolop -> space GTE . space
-    (1) space -> .
-    (2) space -> . SPACES
-
-    VARNAME         reduce using rule 1 (space -> .)
-    NUMBER          reduce using rule 1 (space -> .)
-    SPACES          shift and go to state 6
-
-    space                          shift and go to state 135
-
-state 110
-
-    (5) boolop -> space < . space
-    (1) space -> .
-    (2) space -> . SPACES
-
-    VARNAME         reduce using rule 1 (space -> .)
-    NUMBER          reduce using rule 1 (space -> .)
-    SPACES          shift and go to state 6
-
-    space                          shift and go to state 136
-
 state 111
 
-    (6) boolop -> space > . space
+    (3) boolop -> space LTE . space
     (1) space -> .
     (2) space -> . SPACES
 
@@ -1476,26 +1476,62 @@ state 111
 
 state 112
 
-    (7) boolop -> space = . = space
+    (4) boolop -> space GTE . space
+    (1) space -> .
+    (2) space -> . SPACES
 
-    =               shift and go to state 138
+    VARNAME         reduce using rule 1 (space -> .)
+    NUMBER          reduce using rule 1 (space -> .)
+    SPACES          shift and go to state 6
 
+    space                          shift and go to state 138
 
 state 113
 
-    (8) boolop -> space ! . = space
+    (5) boolop -> space < . space
+    (1) space -> .
+    (2) space -> . SPACES
 
-    =               shift and go to state 139
+    VARNAME         reduce using rule 1 (space -> .)
+    NUMBER          reduce using rule 1 (space -> .)
+    SPACES          shift and go to state 6
 
+    space                          shift and go to state 139
 
 state 114
 
-    (31) stmt -> IF SPACES VARNAME SPACES GOTO . SPACES NUMBER
+    (6) boolop -> space > . space
+    (1) space -> .
+    (2) space -> . SPACES
 
-    SPACES          shift and go to state 140
+    VARNAME         reduce using rule 1 (space -> .)
+    NUMBER          reduce using rule 1 (space -> .)
+    SPACES          shift and go to state 6
 
+    space                          shift and go to state 140
 
 state 115
+
+    (7) boolop -> space = . = space
+
+    =               shift and go to state 141
+
+
+state 116
+
+    (8) boolop -> space ! . = space
+
+    =               shift and go to state 142
+
+
+state 117
+
+    (32) stmt -> IF SPACES VARNAME SPACES GOTO . SPACES NUMBER
+
+    SPACES          shift and go to state 143
+
+
+state 118
 
     (9) boolexp -> VARNAME boolop VARNAME .
 
@@ -1505,7 +1541,7 @@ state 115
     }               reduce using rule 9 (boolexp -> VARNAME boolop VARNAME .)
 
 
-state 116
+state 119
 
     (10) boolexp -> VARNAME boolop NUMBER .
 
@@ -1515,108 +1551,108 @@ state 116
     }               reduce using rule 10 (boolexp -> VARNAME boolop NUMBER .)
 
 
-state 117
+state 120
 
-    (47) func -> func nl VARNAME funcparams spnl { spnl funcbody . spnl }
-    (37) funcbody -> funcbody . stmtnl stmt
-    (49) spnl -> . space
-    (50) spnl -> . nl
-    (35) stmtnl -> . NEWLINE
+    (48) func -> func nl VARNAME funcparams spnl { spnl funcbody . spnl }
+    (38) funcbody -> funcbody . stmtnl stmt
+    (50) spnl -> . space
+    (51) spnl -> . nl
+    (36) stmtnl -> . NEWLINE
     (1) space -> .
     (2) space -> . SPACES
-    (34) nl -> . NEWLINE
+    (35) nl -> . NEWLINE
 
     NEWLINE         shift and go to state 19
     }               reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
     nl                             shift and go to state 4
-    spnl                           shift and go to state 141
-    stmtnl                         shift and go to state 142
+    spnl                           shift and go to state 144
+    stmtnl                         shift and go to state 145
     space                          shift and go to state 5
-
-state 118
-
-    (48) func -> func nl VARNAME funcparams spnl { spnl } .
-
-    NEWLINE         reduce using rule 48 (func -> func nl VARNAME funcparams spnl { spnl } .)
-
-
-state 119
-
-    (36) funcbody -> stmt .
-
-    NEWLINE         reduce using rule 36 (funcbody -> stmt .)
-    SPACES          reduce using rule 36 (funcbody -> stmt .)
-    }               reduce using rule 36 (funcbody -> stmt .)
-
-
-state 120
-
-    (45) funcparams -> ( space paramlist space ) .
-
-    SPACES          reduce using rule 45 (funcparams -> ( space paramlist space ) .)
-    NEWLINE         reduce using rule 45 (funcparams -> ( space paramlist space ) .)
-    {               reduce using rule 45 (funcparams -> ( space paramlist space ) .)
-
 
 state 121
 
-    (43) paramlist -> paramlist space , . space VARNAME SPACES VARNAME
+    (49) func -> func nl VARNAME funcparams spnl { spnl } .
+
+    NEWLINE         reduce using rule 49 (func -> func nl VARNAME funcparams spnl { spnl } .)
+
+
+state 122
+
+    (37) funcbody -> stmt .
+
+    NEWLINE         reduce using rule 37 (funcbody -> stmt .)
+    SPACES          reduce using rule 37 (funcbody -> stmt .)
+    }               reduce using rule 37 (funcbody -> stmt .)
+
+
+state 123
+
+    (46) funcparams -> ( space paramlist space ) .
+
+    SPACES          reduce using rule 46 (funcparams -> ( space paramlist space ) .)
+    NEWLINE         reduce using rule 46 (funcparams -> ( space paramlist space ) .)
+    {               reduce using rule 46 (funcparams -> ( space paramlist space ) .)
+
+
+state 124
+
+    (44) paramlist -> paramlist space , . space VARNAME SPACES VARNAME
     (1) space -> .
     (2) space -> . SPACES
 
     VARNAME         reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 143
-
-state 122
-
-    (42) paramlist -> VARNAME SPACES VARNAME .
-
-    SPACES          reduce using rule 42 (paramlist -> VARNAME SPACES VARNAME .)
-    )               reduce using rule 42 (paramlist -> VARNAME SPACES VARNAME .)
-    ,               reduce using rule 42 (paramlist -> VARNAME SPACES VARNAME .)
-
-
-state 123
-
-    (54) declist -> VARNAME STARS SPACES list .
-    (52) list -> list . , space VARNAME space
-
-    NEWLINE         reduce using rule 54 (declist -> VARNAME STARS SPACES list .)
-    SPACES          reduce using rule 54 (declist -> VARNAME STARS SPACES list .)
-    }               reduce using rule 54 (declist -> VARNAME STARS SPACES list .)
-    ,               shift and go to state 78
-
-
-state 124
-
-    (58) structs -> structs VARNAME space { spnl declist spnl } nl .
-
-    VARNAME         reduce using rule 58 (structs -> structs VARNAME space { spnl declist spnl } nl .)
-    FUNCS           reduce using rule 58 (structs -> structs VARNAME space { spnl declist spnl } nl .)
-
+    space                          shift and go to state 146
 
 state 125
 
-    (55) declist -> declist nl VARNAME SPACES . list
-    (51) list -> . VARNAME space
-    (52) list -> . list , space VARNAME space
+    (43) paramlist -> VARNAME SPACES VARNAME .
 
-    VARNAME         shift and go to state 55
+    SPACES          reduce using rule 43 (paramlist -> VARNAME SPACES VARNAME .)
+    )               reduce using rule 43 (paramlist -> VARNAME SPACES VARNAME .)
+    ,               reduce using rule 43 (paramlist -> VARNAME SPACES VARNAME .)
 
-    list                           shift and go to state 144
 
 state 126
 
-    (56) declist -> declist nl VARNAME STARS . SPACES list
+    (55) declist -> VARNAME STARS SPACES list .
+    (53) list -> list . , space VARNAME space
 
-    SPACES          shift and go to state 145
+    NEWLINE         reduce using rule 55 (declist -> VARNAME STARS SPACES list .)
+    SPACES          reduce using rule 55 (declist -> VARNAME STARS SPACES list .)
+    }               reduce using rule 55 (declist -> VARNAME STARS SPACES list .)
+    ,               shift and go to state 81
 
 
 state 127
+
+    (59) structs -> structs VARNAME space { spnl declist spnl } nl .
+
+    VARNAME         reduce using rule 59 (structs -> structs VARNAME space { spnl declist spnl } nl .)
+    FUNCS           reduce using rule 59 (structs -> structs VARNAME space { spnl declist spnl } nl .)
+
+
+state 128
+
+    (56) declist -> declist nl VARNAME SPACES . list
+    (52) list -> . VARNAME space
+    (53) list -> . list , space VARNAME space
+
+    VARNAME         shift and go to state 57
+
+    list                           shift and go to state 147
+
+state 129
+
+    (57) declist -> declist nl VARNAME STARS . SPACES list
+
+    SPACES          shift and go to state 148
+
+
+state 130
 
     (19) rhs -> & VARNAME .
 
@@ -1626,16 +1662,16 @@ state 127
     }               reduce using rule 19 (rhs -> & VARNAME .)
 
 
-state 128
+state 131
 
     (26) stmt -> VARNAME space = space MALLOC ( . )
 
-    )               shift and go to state 146
+    )               shift and go to state 149
 
 
-state 129
+state 132
 
-    (52) list -> list , space VARNAME . space
+    (53) list -> list , space VARNAME . space
     (1) space -> .
     (2) space -> . SPACES
 
@@ -1647,22 +1683,22 @@ state 129
 
   ! SPACES          [ shift and go to state 6 ]
 
-    space                          shift and go to state 147
+    space                          shift and go to state 150
 
-state 130
+state 133
 
-    (40) funcargs -> ( space ) .
+    (41) funcargs -> ( space ) .
 
-    NEWLINE         reduce using rule 40 (funcargs -> ( space ) .)
-    SPACES          reduce using rule 40 (funcargs -> ( space ) .)
-    $end            reduce using rule 40 (funcargs -> ( space ) .)
-    }               reduce using rule 40 (funcargs -> ( space ) .)
+    NEWLINE         reduce using rule 41 (funcargs -> ( space ) .)
+    SPACES          reduce using rule 41 (funcargs -> ( space ) .)
+    $end            reduce using rule 41 (funcargs -> ( space ) .)
+    }               reduce using rule 41 (funcargs -> ( space ) .)
 
 
-state 131
+state 134
 
-    (41) funcargs -> ( space arglist . space )
-    (39) arglist -> arglist . space , space VARNAME
+    (42) funcargs -> ( space arglist . space )
+    (40) arglist -> arglist . space , space VARNAME
     (1) space -> .
     (2) space -> . SPACES
 
@@ -1670,25 +1706,25 @@ state 131
     ,               reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 148
+    space                          shift and go to state 151
 
-state 132
+state 135
 
-    (38) arglist -> VARNAME .
+    (39) arglist -> VARNAME .
 
-    SPACES          reduce using rule 38 (arglist -> VARNAME .)
-    )               reduce using rule 38 (arglist -> VARNAME .)
-    ,               reduce using rule 38 (arglist -> VARNAME .)
-
-
-state 133
-
-    (30) stmt -> IF SPACES boolexp SPACES GOTO SPACES . NUMBER
-
-    NUMBER          shift and go to state 149
+    SPACES          reduce using rule 39 (arglist -> VARNAME .)
+    )               reduce using rule 39 (arglist -> VARNAME .)
+    ,               reduce using rule 39 (arglist -> VARNAME .)
 
 
-state 134
+state 136
+
+    (31) stmt -> IF SPACES boolexp SPACES GOTO SPACES . NUMBER
+
+    NUMBER          shift and go to state 152
+
+
+state 137
 
     (3) boolop -> space LTE space .
 
@@ -1696,7 +1732,7 @@ state 134
     NUMBER          reduce using rule 3 (boolop -> space LTE space .)
 
 
-state 135
+state 138
 
     (4) boolop -> space GTE space .
 
@@ -1704,7 +1740,7 @@ state 135
     NUMBER          reduce using rule 4 (boolop -> space GTE space .)
 
 
-state 136
+state 139
 
     (5) boolop -> space < space .
 
@@ -1712,7 +1748,7 @@ state 136
     NUMBER          reduce using rule 5 (boolop -> space < space .)
 
 
-state 137
+state 140
 
     (6) boolop -> space > space .
 
@@ -1720,7 +1756,7 @@ state 137
     NUMBER          reduce using rule 6 (boolop -> space > space .)
 
 
-state 138
+state 141
 
     (7) boolop -> space = = . space
     (1) space -> .
@@ -1730,9 +1766,9 @@ state 138
     NUMBER          reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 150
+    space                          shift and go to state 153
 
-state 139
+state 142
 
     (8) boolop -> space ! = . space
     (1) space -> .
@@ -1742,34 +1778,35 @@ state 139
     NUMBER          reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 151
+    space                          shift and go to state 154
 
-state 140
+state 143
 
-    (31) stmt -> IF SPACES VARNAME SPACES GOTO SPACES . NUMBER
+    (32) stmt -> IF SPACES VARNAME SPACES GOTO SPACES . NUMBER
 
-    NUMBER          shift and go to state 152
-
-
-state 141
-
-    (47) func -> func nl VARNAME funcparams spnl { spnl funcbody spnl . }
-
-    }               shift and go to state 153
+    NUMBER          shift and go to state 155
 
 
-state 142
+state 144
 
-    (37) funcbody -> funcbody stmtnl . stmt
+    (48) func -> func nl VARNAME funcparams spnl { spnl funcbody spnl . }
+
+    }               shift and go to state 156
+
+
+state 145
+
+    (38) funcbody -> funcbody stmtnl . stmt
     (23) stmt -> . vardec
     (24) stmt -> . lhs space = space rhs
     (25) stmt -> . VARNAME space = space rhs
     (26) stmt -> . VARNAME space = space MALLOC ( )
     (27) stmt -> . READ SPACES VARNAME
-    (28) stmt -> . GOTO SPACES NUMBER
-    (29) stmt -> . CALL SPACES VARNAME funcargs
-    (30) stmt -> . IF SPACES boolexp SPACES GOTO SPACES NUMBER
-    (31) stmt -> . IF SPACES VARNAME SPACES GOTO SPACES NUMBER
+    (28) stmt -> . USE SPACES VARNAME
+    (29) stmt -> . GOTO SPACES NUMBER
+    (30) stmt -> . CALL SPACES VARNAME funcargs
+    (31) stmt -> . IF SPACES boolexp SPACES GOTO SPACES NUMBER
+    (32) stmt -> . IF SPACES VARNAME SPACES GOTO SPACES NUMBER
     (21) vardec -> . VARNAME SPACES list
     (22) vardec -> . VARNAME STARS SPACES list
     (13) lhs -> . STARS VARNAME
@@ -1778,44 +1815,45 @@ state 142
 
     VARNAME         shift and go to state 27
     READ            shift and go to state 28
-    GOTO            shift and go to state 29
-    CALL            shift and go to state 30
-    IF              shift and go to state 31
-    STARS           shift and go to state 32
+    USE             shift and go to state 29
+    GOTO            shift and go to state 30
+    CALL            shift and go to state 31
+    IF              shift and go to state 32
+    STARS           shift and go to state 33
 
-    stmt                           shift and go to state 154
+    stmt                           shift and go to state 157
     vardec                         shift and go to state 25
     lhs                            shift and go to state 26
 
-state 143
-
-    (43) paramlist -> paramlist space , space . VARNAME SPACES VARNAME
-
-    VARNAME         shift and go to state 155
-
-
-state 144
-
-    (55) declist -> declist nl VARNAME SPACES list .
-    (52) list -> list . , space VARNAME space
-
-    NEWLINE         reduce using rule 55 (declist -> declist nl VARNAME SPACES list .)
-    SPACES          reduce using rule 55 (declist -> declist nl VARNAME SPACES list .)
-    }               reduce using rule 55 (declist -> declist nl VARNAME SPACES list .)
-    ,               shift and go to state 78
-
-
-state 145
-
-    (56) declist -> declist nl VARNAME STARS SPACES . list
-    (51) list -> . VARNAME space
-    (52) list -> . list , space VARNAME space
-
-    VARNAME         shift and go to state 55
-
-    list                           shift and go to state 156
-
 state 146
+
+    (44) paramlist -> paramlist space , space . VARNAME SPACES VARNAME
+
+    VARNAME         shift and go to state 158
+
+
+state 147
+
+    (56) declist -> declist nl VARNAME SPACES list .
+    (53) list -> list . , space VARNAME space
+
+    NEWLINE         reduce using rule 56 (declist -> declist nl VARNAME SPACES list .)
+    SPACES          reduce using rule 56 (declist -> declist nl VARNAME SPACES list .)
+    }               reduce using rule 56 (declist -> declist nl VARNAME SPACES list .)
+    ,               shift and go to state 81
+
+
+state 148
+
+    (57) declist -> declist nl VARNAME STARS SPACES . list
+    (52) list -> . VARNAME space
+    (53) list -> . list , space VARNAME space
+
+    VARNAME         shift and go to state 57
+
+    list                           shift and go to state 159
+
+state 149
 
     (26) stmt -> VARNAME space = space MALLOC ( ) .
 
@@ -1825,37 +1863,37 @@ state 146
     }               reduce using rule 26 (stmt -> VARNAME space = space MALLOC ( ) .)
 
 
-state 147
-
-    (52) list -> list , space VARNAME space .
-
-    ,               reduce using rule 52 (list -> list , space VARNAME space .)
-    NEWLINE         reduce using rule 52 (list -> list , space VARNAME space .)
-    SPACES          reduce using rule 52 (list -> list , space VARNAME space .)
-    $end            reduce using rule 52 (list -> list , space VARNAME space .)
-    }               reduce using rule 52 (list -> list , space VARNAME space .)
-
-
-state 148
-
-    (41) funcargs -> ( space arglist space . )
-    (39) arglist -> arglist space . , space VARNAME
-
-    )               shift and go to state 157
-    ,               shift and go to state 158
-
-
-state 149
-
-    (30) stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .
-
-    NEWLINE         reduce using rule 30 (stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .)
-    SPACES          reduce using rule 30 (stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .)
-    $end            reduce using rule 30 (stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .)
-    }               reduce using rule 30 (stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .)
-
-
 state 150
+
+    (53) list -> list , space VARNAME space .
+
+    ,               reduce using rule 53 (list -> list , space VARNAME space .)
+    NEWLINE         reduce using rule 53 (list -> list , space VARNAME space .)
+    SPACES          reduce using rule 53 (list -> list , space VARNAME space .)
+    $end            reduce using rule 53 (list -> list , space VARNAME space .)
+    }               reduce using rule 53 (list -> list , space VARNAME space .)
+
+
+state 151
+
+    (42) funcargs -> ( space arglist space . )
+    (40) arglist -> arglist space . , space VARNAME
+
+    )               shift and go to state 160
+    ,               shift and go to state 161
+
+
+state 152
+
+    (31) stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .
+
+    NEWLINE         reduce using rule 31 (stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .)
+    SPACES          reduce using rule 31 (stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .)
+    $end            reduce using rule 31 (stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .)
+    }               reduce using rule 31 (stmt -> IF SPACES boolexp SPACES GOTO SPACES NUMBER .)
+
+
+state 153
 
     (7) boolop -> space = = space .
 
@@ -1863,7 +1901,7 @@ state 150
     NUMBER          reduce using rule 7 (boolop -> space = = space .)
 
 
-state 151
+state 154
 
     (8) boolop -> space ! = space .
 
@@ -1871,99 +1909,99 @@ state 151
     NUMBER          reduce using rule 8 (boolop -> space ! = space .)
 
 
-state 152
-
-    (31) stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .
-
-    NEWLINE         reduce using rule 31 (stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .)
-    SPACES          reduce using rule 31 (stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .)
-    $end            reduce using rule 31 (stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .)
-    }               reduce using rule 31 (stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .)
-
-
-state 153
-
-    (47) func -> func nl VARNAME funcparams spnl { spnl funcbody spnl } .
-
-    NEWLINE         reduce using rule 47 (func -> func nl VARNAME funcparams spnl { spnl funcbody spnl } .)
-
-
-state 154
-
-    (37) funcbody -> funcbody stmtnl stmt .
-
-    NEWLINE         reduce using rule 37 (funcbody -> funcbody stmtnl stmt .)
-    SPACES          reduce using rule 37 (funcbody -> funcbody stmtnl stmt .)
-    }               reduce using rule 37 (funcbody -> funcbody stmtnl stmt .)
-
-
 state 155
 
-    (43) paramlist -> paramlist space , space VARNAME . SPACES VARNAME
+    (32) stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .
 
-    SPACES          shift and go to state 159
+    NEWLINE         reduce using rule 32 (stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .)
+    SPACES          reduce using rule 32 (stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .)
+    $end            reduce using rule 32 (stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .)
+    }               reduce using rule 32 (stmt -> IF SPACES VARNAME SPACES GOTO SPACES NUMBER .)
 
 
 state 156
 
-    (56) declist -> declist nl VARNAME STARS SPACES list .
-    (52) list -> list . , space VARNAME space
+    (48) func -> func nl VARNAME funcparams spnl { spnl funcbody spnl } .
 
-    NEWLINE         reduce using rule 56 (declist -> declist nl VARNAME STARS SPACES list .)
-    SPACES          reduce using rule 56 (declist -> declist nl VARNAME STARS SPACES list .)
-    }               reduce using rule 56 (declist -> declist nl VARNAME STARS SPACES list .)
-    ,               shift and go to state 78
+    NEWLINE         reduce using rule 48 (func -> func nl VARNAME funcparams spnl { spnl funcbody spnl } .)
 
 
 state 157
 
-    (41) funcargs -> ( space arglist space ) .
+    (38) funcbody -> funcbody stmtnl stmt .
 
-    NEWLINE         reduce using rule 41 (funcargs -> ( space arglist space ) .)
-    SPACES          reduce using rule 41 (funcargs -> ( space arglist space ) .)
-    $end            reduce using rule 41 (funcargs -> ( space arglist space ) .)
-    }               reduce using rule 41 (funcargs -> ( space arglist space ) .)
+    NEWLINE         reduce using rule 38 (funcbody -> funcbody stmtnl stmt .)
+    SPACES          reduce using rule 38 (funcbody -> funcbody stmtnl stmt .)
+    }               reduce using rule 38 (funcbody -> funcbody stmtnl stmt .)
 
 
 state 158
 
-    (39) arglist -> arglist space , . space VARNAME
+    (44) paramlist -> paramlist space , space VARNAME . SPACES VARNAME
+
+    SPACES          shift and go to state 162
+
+
+state 159
+
+    (57) declist -> declist nl VARNAME STARS SPACES list .
+    (53) list -> list . , space VARNAME space
+
+    NEWLINE         reduce using rule 57 (declist -> declist nl VARNAME STARS SPACES list .)
+    SPACES          reduce using rule 57 (declist -> declist nl VARNAME STARS SPACES list .)
+    }               reduce using rule 57 (declist -> declist nl VARNAME STARS SPACES list .)
+    ,               shift and go to state 81
+
+
+state 160
+
+    (42) funcargs -> ( space arglist space ) .
+
+    NEWLINE         reduce using rule 42 (funcargs -> ( space arglist space ) .)
+    SPACES          reduce using rule 42 (funcargs -> ( space arglist space ) .)
+    $end            reduce using rule 42 (funcargs -> ( space arglist space ) .)
+    }               reduce using rule 42 (funcargs -> ( space arglist space ) .)
+
+
+state 161
+
+    (40) arglist -> arglist space , . space VARNAME
     (1) space -> .
     (2) space -> . SPACES
 
     VARNAME         reduce using rule 1 (space -> .)
     SPACES          shift and go to state 6
 
-    space                          shift and go to state 160
-
-state 159
-
-    (43) paramlist -> paramlist space , space VARNAME SPACES . VARNAME
-
-    VARNAME         shift and go to state 161
-
-
-state 160
-
-    (39) arglist -> arglist space , space . VARNAME
-
-    VARNAME         shift and go to state 162
-
-
-state 161
-
-    (43) paramlist -> paramlist space , space VARNAME SPACES VARNAME .
-
-    SPACES          reduce using rule 43 (paramlist -> paramlist space , space VARNAME SPACES VARNAME .)
-    )               reduce using rule 43 (paramlist -> paramlist space , space VARNAME SPACES VARNAME .)
-    ,               reduce using rule 43 (paramlist -> paramlist space , space VARNAME SPACES VARNAME .)
-
+    space                          shift and go to state 163
 
 state 162
 
-    (39) arglist -> arglist space , space VARNAME .
+    (44) paramlist -> paramlist space , space VARNAME SPACES . VARNAME
 
-    SPACES          reduce using rule 39 (arglist -> arglist space , space VARNAME .)
-    )               reduce using rule 39 (arglist -> arglist space , space VARNAME .)
-    ,               reduce using rule 39 (arglist -> arglist space , space VARNAME .)
+    VARNAME         shift and go to state 164
+
+
+state 163
+
+    (40) arglist -> arglist space , space . VARNAME
+
+    VARNAME         shift and go to state 165
+
+
+state 164
+
+    (44) paramlist -> paramlist space , space VARNAME SPACES VARNAME .
+
+    SPACES          reduce using rule 44 (paramlist -> paramlist space , space VARNAME SPACES VARNAME .)
+    )               reduce using rule 44 (paramlist -> paramlist space , space VARNAME SPACES VARNAME .)
+    ,               reduce using rule 44 (paramlist -> paramlist space , space VARNAME SPACES VARNAME .)
+
+
+state 165
+
+    (40) arglist -> arglist space , space VARNAME .
+
+    SPACES          reduce using rule 40 (arglist -> arglist space , space VARNAME .)
+    )               reduce using rule 40 (arglist -> arglist space , space VARNAME .)
+    ,               reduce using rule 40 (arglist -> arglist space , space VARNAME .)
 

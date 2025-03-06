@@ -1,5 +1,4 @@
 from pta_helper import *
-import graphviz
 import copy
 
 def perform_fspta(struct_dict, var_dict, stmt_lst):
@@ -25,14 +24,13 @@ def perform_fspta(struct_dict, var_dict, stmt_lst):
         stmt_no = 1
         for stmt in new_stmt_lst[1:]:
             ptr_dict_out = ptr_dicts[stmt_no]
-            old_len = nested_len(ptr_dict_out)
-            # pred_ptr_dicts = [ptr_dicts[stmt_no-1]]
+            old_len = nested_len_pt(ptr_dict_out)
 
             pred_ptr_dicts = []
             for pred in predecessors[stmt_no]:
                 pred_ptr_dicts.append(ptr_dicts[pred])
 
-            get_pin(ptr_dict_out, pred_ptr_dicts)
+            set_pin(ptr_dict_out, pred_ptr_dicts)
 
             if stmt[0] != 'ASG':
                 stmt_no += 1
@@ -42,12 +40,10 @@ def perform_fspta(struct_dict, var_dict, stmt_lst):
             rhs = stmt[2]
 
             pointees = get_pointees(ptr_dict_out, rhs)
-            # print(pointees)
             vars, fld = get_defs(ptr_dict_out, lhs)
 
             su_vars, su_fld = get_strong_update(ptr_dict_out, lhs)
             for su_var in su_vars:
-                # print(ptr_dict_out)
                 if su_var == '$all':
                     for var in ptr_dict_out.values():
                         if su_fld in var:
@@ -56,32 +52,13 @@ def perform_fspta(struct_dict, var_dict, stmt_lst):
                     ptr_dict_out[su_var][su_fld].clear()
 
             for var in vars:
-                # old_len = len(ptr_dict[var][fld])
                 ptr_dict_out[var][fld].update(pointees)
 
-            change = change or (old_len != nested_len(ptr_dict_out))
+            change = change or (old_len != nested_len_pt(ptr_dict_out))
 
             stmt_no += 1
         count += 1
 
     print("FSPTA Iteration -", count, "(confirmation)")
 
-    count = 0
-    dot = graphviz.Digraph(comment="FSPTA", node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'dpi':'250'}, engine='dot')
-    color_dict = {}
-
-    for node in ptr_dicts[-1].keys():
-        count = count%num_colors + 1
-        color_dict[node] = str(count)
-        dot.node(node, color = str(count))
-
-    for key, val in ptr_dicts[-1].items():
-        print(key,":")
-        for key2, val2 in val.items():
-            print('\t',key2, '-', val2)
-            if key2 == '*':
-                key2 = '⁎'
-            for v in val2:
-                dot.edge(key, v, label = key2, color = color_dict[key])
-    # dot.unflatten(stagger=3)
-    dot.render('fspta', format='png', cleanup=True)
+    get_points_to_graph(ptr_dicts[-1], 'fspta')

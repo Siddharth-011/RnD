@@ -43,19 +43,42 @@ main:
 //y->g = &a
 
 
-scalar a,b,c,d, z
-scalar* q,r,e
-scalar** p
-if 10<20 goto 56
+//scalar a,b,c,d, z
+//scalar* q,r,e
+//scalar** p
+//if 10<20 goto 56
+//
+//p = &q
+//q = &a
+//r = &c
+//
+//goto 60
+//
+//p = &r
+//q = &b
+//r = &d
+//
+//e = *p
 
-p = &q
-q = &a
-r = &c
-*p = &z
-goto 60
+scalar a
+scalar* p,q,r
+scalar** x,y,z
+scalar*** w
 
-p = &r
-q = &b
-r = &d
+w = &y
+y = &q
 
-e = *p
+if a goto 78
+
+x = &p
+z = &r
+*w = x
+
+goto 82
+
+x = &r
+z = &p
+*w = z
+
+*y = &a
+use p

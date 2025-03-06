@@ -6,6 +6,7 @@ reserved  = {
     'if' : 'IF',
     'goto' : 'GOTO',
     'read' : 'READ',
+    'use' : 'USE',
     'structs' : 'STRT',
     'funcs' : 'FUNCS',
     'main' : 'MAINCODE',

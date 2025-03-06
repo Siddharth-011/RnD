@@ -26,23 +26,24 @@ def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
 
     print("Andersens Iteration -", count, "(confirmation)")
 
-    count = 0
-    dot = graphviz.Digraph(comment="Andersen's PTA", node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'dpi':'250'}, engine='dot')
-    color_dict = {}
+    # count = 0
+    # dot = graphviz.Digraph(comment="Andersen's PTA", node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'dpi':'250'}, engine='dot')
+    # color_dict = {}
 
-    for node in ptr_dict.keys():
-        count = count%num_colors + 1
-        color_dict[node] = str(count)
-        dot.node(node, color = str(count))
+    # for node in ptr_dict.keys():
+    #     count = count%num_colors + 1
+    #     color_dict[node] = str(count)
+    #     dot.node(node, color = str(count))
 
-    for key, val in ptr_dict.items():
-        print(key,":")
-        for key2, val2 in val.items():
-            print('\t',key2, '-', val2)
-            for v in val2:
-                dot.edge(key, v, label = key2, color = color_dict[key])
-    # dot.unflatten(stagger=3)
-    dot.render('andersens', format='png', cleanup=True)
+    # for key, val in ptr_dict.items():
+    #     print(key,":")
+    #     for key2, val2 in val.items():
+    #         print('\t',key2, '-', val2)
+    #         for v in val2:
+    #             dot.edge(key, v, label = key2, color = color_dict[key])
+    # # dot.unflatten(stagger=3)
+    # dot.render('andersens', format='png', cleanup=True)
+    get_points_to_graph(ptr_dict, 'andersens')
 
 def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
     ptr_dict = {}

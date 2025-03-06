@@ -1,12 +1,6 @@
-import graphviz
+from helper import *
 
-num_colors = 9
-colorscheme = 'set19'
-
-def nested_len(ptr_dict):
-    return sum(sum(len(val2) for val2 in val.values()) for val in ptr_dict.values())
-
-def get_fspta_stmts(struct_dict, stmt_lst):
+def get_fspta_stmts(struct_dict, stmt_lst, lb = False):
     new_stmt_lst = [stmt_lst[0]]
 
     counter_lst = [None]*(len(stmt_lst)+1)
@@ -18,34 +12,48 @@ def get_fspta_stmts(struct_dict, stmt_lst):
     new_stmt_counter = 1
     counter_to_stmt = {0:0}
     stmt_to_counter = {0:0}
-
     for stmt in stmt_lst[1:-1]:
-        if stmt[0] == 'ASG':
-            if contains_pointer(stmt[1][0], struct_dict):
-                new_stmt_lst.append(['ASG', stmt[1][1], stmt[2][1]])
+        match stmt[0]:
+            case 'ASG':
+                check = contains_pointer(stmt[1][0], struct_dict)
+                lhs = stmt[1][1]
+                rhs = stmt[2][1]
+                if check or (lb and ((lhs[0] == 'FLP') or (rhs[0] in ['FLP', 'PTR']))):
+                    if lb:
+                        new_stmt_lst.append(['ASG', lhs, rhs, check])
+                    else:
+                        new_stmt_lst.append(['ASG', lhs, rhs])
+                    counter_lst[counter] = counter
+                    counter_to_stmt[counter] = new_stmt_counter
+                    stmt_to_counter[new_stmt_counter] = counter
+                    new_stmt_counter += 1
+            case 'GOT':
+                if counter == stmt[1]:
+                    counter_lst[counter] = -1
+                else:
+                    counter_lst[counter] = stmt[1]
+            case 'IF':
+                new_stmt_lst.append(['IF', stmt[1], stmt[2]])
                 counter_lst[counter] = counter
                 counter_to_stmt[counter] = new_stmt_counter
                 stmt_to_counter[new_stmt_counter] = counter
                 new_stmt_counter += 1
-        elif stmt[0] == 'GOT':
-            counter_lst[counter] = stmt[1]
-        elif stmt[0] == 'IF':
-            new_stmt_lst.append(['IF', stmt[1], stmt[2]])
-            counter_lst[counter] = counter
-            counter_to_stmt[counter] = new_stmt_counter
-            stmt_to_counter[new_stmt_counter] = counter
-            new_stmt_counter += 1
+            case 'USE':
+                if lb and (stmt[1][0][-1] == '*'):
+                    new_stmt_lst.append(['USE', stmt[1][1]])
+                    counter_lst[counter] = counter
+                    counter_to_stmt[counter] = new_stmt_counter
+                    stmt_to_counter[new_stmt_counter] = counter
+                    new_stmt_counter += 1
         counter += 1
     
     new_stmt_lst.append(stmt_lst[-1])
     counter_to_stmt[counter] = new_stmt_counter
     stmt_to_counter[new_stmt_counter] = counter
-    counter += 1
-    new_stmt_counter += 1
 
     new_stmt_lst.append(['loop'])
-    counter_to_stmt[counter] = new_stmt_counter
-    stmt_to_counter[new_stmt_counter] = counter
+    counter_to_stmt[counter + 1] = new_stmt_counter + 1
+    stmt_to_counter[new_stmt_counter + 1] = counter + 1
 
     successors = [None]*len(new_stmt_lst)
 
@@ -53,13 +61,13 @@ def get_fspta_stmts(struct_dict, stmt_lst):
     new_stmt_counter = 0
     for stmt in new_stmt_lst[0:-2]:
         if stmt[0] == 'IF':
-            succ1 = counter_to_stmt[get_new_loc(stmt_to_counter[new_stmt_counter]+1, counter_lst)]
-            succ2 = counter_to_stmt[get_new_loc(stmt[2], counter_lst)]
+            succ1 = counter_to_stmt[get_next_counter(stmt_to_counter[new_stmt_counter]+1, counter_lst)]
+            succ2 = counter_to_stmt[get_next_counter(stmt[2], counter_lst)]
             successors[new_stmt_counter] = [succ1, succ2]
             predecessors[succ1].append(new_stmt_counter)
             predecessors[succ2].append(new_stmt_counter)
         else:
-            succ = counter_to_stmt[get_new_loc(stmt_to_counter[new_stmt_counter]+1, counter_lst)]
+            succ = counter_to_stmt[get_next_counter(stmt_to_counter[new_stmt_counter]+1, counter_lst)]
             successors[new_stmt_counter] = [succ]
             predecessors[succ].append(new_stmt_counter)
         new_stmt_counter += 1
@@ -69,90 +77,10 @@ def get_fspta_stmts(struct_dict, stmt_lst):
         predecessors.pop()
         successors.pop()
 
-    # for i in range(len(new_stmt_lst)):
-    #     print(i, format_stmt(new_stmt_lst[i]), successors[i], predecessors[i])
+    #TODO (Print)
     get_stmt_graph(new_stmt_lst, successors)
 
     return (new_stmt_lst, successors, predecessors)
-
-def get_new_loc(ind, counter_lst):
-    seen = set()
-    seen_size = -1
-    while seen_size!=len(seen):
-        if ind == counter_lst[ind]:
-            break
-        seen_size = len(seen)
-        seen.add(ind)
-        
-        while counter_lst[ind] == None:
-            ind += 1
-            seen.add(ind)
-        ind = counter_lst[ind]
-
-    if ind != counter_lst[ind]:
-        ind = counter_lst[-1]
-
-    for seen_ind in seen:
-        counter_lst[seen_ind] = ind
-
-    return ind
-
-def format_stmt(stmt):
-    match stmt[0]:
-        case 'ASG':
-            return format_elem(stmt[1])+' = '+format_elem(stmt[2])
-        # case 'GOT':
-        #     return 'goto '+str(stmt[1])
-        case 'IF':
-            return 'if '+format_elem(stmt[1])
-        case 'CAL':
-            return 'call '+stmt[1]
-        case 'INP':
-            return 'read '+stmt[1]
-        case _:
-            return stmt[0]
-
-def format_elem(elem):
-    match elem[0]:
-        case 'VAR':
-            return elem[1]
-        case 'PTR':
-            return '*'+elem[1]
-        case 'FLP':
-            return elem[1]+'->'+elem[2]
-        case 'FLD':
-            return elem[1]+'.'+elem[2]
-        case 'ADR':
-            return '&'+elem[1]
-        case 'NUM':
-            num = str(elem[1])
-            if num[-1]=='0':
-                return num[:-2]
-            return num
-        case 'BEX':
-            return format_elem(elem[2])+elem[1]+format_elem(elem[3])
-        case 'MAL':
-            return 'malloc('+elem[1]+')'
-        
-def get_stmt_graph(stmt_lst, successors):
-    dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, graph_attr={'dpi':'250'}, engine='dot')
-    
-    i = 0
-    # with dot.subgraph(name='cluster0') as c:
-    for stmt in stmt_lst:
-        dot.node(str(i), format_stmt(stmt))
-        i += 1
-        # c.attr(label = 'Hello')
-
-    i = 0
-    for succs in successors[:-1]:
-        if succs:
-            for succ in succs:
-                dot.edge(str(i), str(succ))
-        i += 1
-
-    dot.render('doctest-output/test.gv', format='png', cleanup=True, engine='dot')
-    return dot
 
 def get_pta_stmts(struct_dict, stmt_lst):
     new_stmt_lst = []
@@ -161,17 +89,6 @@ def get_pta_stmts(struct_dict, stmt_lst):
             if contains_pointer(stmt[1][0], struct_dict):
                 new_stmt_lst.append([stmt[1][1], stmt[2][1]])
     return new_stmt_lst
-
-def contains_pointer(struct, struct_dict):
-    if struct == 'scalar':
-        return False
-    elif struct[-1] == '*':
-        return True
-    else:
-        for typ in struct_dict[struct][0].values():
-            if typ[-1] == '*':
-                return True
-    return False
 
 def get_defs(ptr_dict, lhs):
     vars = []
@@ -356,10 +273,108 @@ def get_strong_update(ptr_dict, lhs):
             vars.append(lhs[1])
             fld = lhs[2]
     return (vars, fld)
-
-def get_pin(ptr_dict_in, ptr_dicts):
+#TODO
+def set_pin(ptr_dict_in, ptr_dicts):
     for ptr in ptr_dict_in.keys():
         for fld in ptr_dict_in[ptr].keys():
             ptr_dict_in[ptr][fld].clear()
             for ptr_dict in ptr_dicts:
                 ptr_dict_in[ptr][fld].update(ptr_dict[ptr][fld])
+
+def set_lb_pin(ptr_dict_in, ptr_dicts, liveness_dict):
+    for ptr, ptr_dict in ptr_dict_in.items():
+        for fld, fld_dict in ptr_dict.items():
+            fld_dict.clear()
+            if ptr not in liveness_dict[fld]:
+                continue
+            for ptr_dict in ptr_dicts:
+                ptr_dict_in[ptr][fld].update(ptr_dict[ptr][fld])
+
+def set_pout(ptr_dict_out, stmt):
+    if stmt[0] != 'ASG' or not stmt[3]:
+        return
+    
+    lhs = stmt[1]
+    rhs = stmt[2]
+
+    pointees = get_pointees(ptr_dict_out, rhs)
+    vars, fld = get_defs(ptr_dict_out, lhs)
+
+    su_vars, su_fld = get_strong_update(ptr_dict_out, lhs)
+    for su_var in su_vars:
+        if su_var == '$all':
+            for var in ptr_dict_out.values():
+                if su_fld in var:
+                    var[su_fld].clear()
+        else:
+            ptr_dict_out[su_var][su_fld].clear()
+
+    for var in vars:
+        ptr_dict_out[var][fld].update(pointees)
+
+def set_lhsref(lhsref, lhs, check = False):
+    if lhs[0] in ['PTR', 'FLP']:
+        lhsref['*'] = [lhs[1]]
+    elif check:
+        lhsref['*'] = []
+
+def set_lhsrhsref(ref, stmt, ptr_dict):
+    set_lhsref(ref, stmt[1], True)
+    rhs = stmt[2]
+    check = stmt[3]
+    match rhs[0]:
+        case 'VAR':
+            ref['*'].append(rhs[1])
+        case 'PTR':
+            ref['*'].append(rhs[1])
+            if check:
+                ref['*'].extend(ptr_dict[rhs[1]]['*'])
+                # for q in ptr_dict[rhs[1]]['*']:
+                #     ref['*'].append(q)
+        case 'FLP':
+            ref['*'].append(rhs[1])
+            if check:
+                fld = rhs[2]
+                qs = ptr_dict[rhs[1]][fld]
+                if len(qs) != 0:
+                    ref[fld] = []
+                    ref[fld].extend(qs)
+                    # for q in qs:
+                        # ref[fld].append(q)
+        case 'FLD':
+            ref[rhs[2]] = [rhs[1]]
+            if len(ref['*']) == 0:
+                del ref['*']
+
+def get_ref(stmt, ptr_dict, liveness_dict):
+    ref = {}
+    if stmt[0] == 'ASG':
+        lhs = stmt[1]
+        vars, fld = get_defs(ptr_dict, lhs)
+
+        if liveness_dict[fld].isdisjoint(vars):
+            if sum(len(x) for x in liveness_dict.values()) != 0:
+                set_lhsref(ref, lhs)
+        else:
+            set_lhsrhsref(ref, stmt, ptr_dict)
+
+    elif stmt[0] == 'USE':
+        ref['*'] = [stmt[1]]
+
+    return ref
+
+def set_lin(lout, stmt, ptr_dict):
+    ref = get_ref(stmt, ptr_dict, lout)
+    
+    if (stmt[0] == 'ASG') and stmt[3]:
+        vars, fld = get_strong_update(ptr_dict, stmt[1])
+        lout[fld].difference_update(vars)
+
+    for fld, vars in ref.items():
+        lout[fld].update(vars)
+
+def set_lout(liveness_dict_out, liveness_dicts):
+    for fld, fld_dict in liveness_dict_out.items():
+        fld_dict.clear()
+        for liveness_dict in liveness_dicts:
+            fld_dict.update(liveness_dict[fld])
