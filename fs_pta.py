@@ -1,8 +1,10 @@
 from pta_helper import *
 import copy
 
-def perform_fspta(struct_dict, var_dict, stmt_lst):
+def perform_fspta(struct_dict, var_dict, stmt_lst, result_dest):
     new_stmt_lst, successors, predecessors = get_fspta_stmts(struct_dict, stmt_lst)
+
+    get_stmt_graph(new_stmt_lst, successors, result_dest+'code')
 
     ptr_dicts = [{}]
     set_dicts(var_dict, struct_dict, ptr_dicts[0])
@@ -15,12 +17,12 @@ def perform_fspta(struct_dict, var_dict, stmt_lst):
     del temp_ptr_dict
 
     
-    count = 0
+    iter = 0
     change = True
     while change:
         change = False
-        # print("Iteration -", count)
-        # print(ptr_dict)
+        iter += 1
+
         stmt_no = 1
         for stmt in new_stmt_lst[1:]:
             ptr_dict_out = ptr_dicts[stmt_no]
@@ -31,34 +33,17 @@ def perform_fspta(struct_dict, var_dict, stmt_lst):
                 pred_ptr_dicts.append(ptr_dicts[pred])
 
             set_pin(ptr_dict_out, pred_ptr_dicts)
+            save_points_to_graph(ptr_dict_out, result_dest+'pta/iter_'+str(iter)+'stmt_'+str(stmt_no)+'_in')
+            save_dict_to_json(ptr_dict_out, result_dest+'pta/iter_'+str(iter)+'stmt_'+str(stmt_no)+'_in.json')
 
-            if stmt[0] != 'ASG':
-                stmt_no += 1
-                continue
-
-            lhs = stmt[1]
-            rhs = stmt[2]
-
-            pointees = get_pointees(ptr_dict_out, rhs)
-            vars, fld = get_defs(ptr_dict_out, lhs)
-
-            su_vars, su_fld = get_strong_update(ptr_dict_out, lhs)
-            for su_var in su_vars:
-                if su_var == '$all':
-                    for var in ptr_dict_out.values():
-                        if su_fld in var:
-                            var[su_fld].clear()
-                else:
-                    ptr_dict_out[su_var][su_fld].clear()
-
-            for var in vars:
-                ptr_dict_out[var][fld].update(pointees)
+            set_pout(ptr_dict_out, stmt)
+            save_points_to_graph(ptr_dict_out, result_dest+'pta/iter_'+str(iter)+'stmt_'+str(stmt_no)+'_out')
+            save_dict_to_json(ptr_dict_out, result_dest+'pta/iter_'+str(iter)+'stmt_'+str(stmt_no)+'_out.json')
 
             change = change or (old_len != nested_len_pt(ptr_dict_out))
 
             stmt_no += 1
-        count += 1
 
-    print("FSPTA Iteration -", count, "(confirmation)")
+    print("FSPTA Iteration -", iter, "(confirmation)")
 
-    get_points_to_graph(ptr_dicts[-1], 'fspta')
+    # save_points_to_graph(ptr_dicts[-1], 'fspta')

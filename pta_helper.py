@@ -19,10 +19,12 @@ def get_fspta_stmts(struct_dict, stmt_lst, lb = False):
                 lhs = stmt[1][1]
                 rhs = stmt[2][1]
                 if check or (lb and ((lhs[0] == 'FLP') or (rhs[0] in ['FLP', 'PTR']))):
-                    if lb:
-                        new_stmt_lst.append(['ASG', lhs, rhs, check])
-                    else:
-                        new_stmt_lst.append(['ASG', lhs, rhs])
+                    # if lb:
+                    #     new_stmt_lst.append(['ASG', lhs, rhs, check])
+                    # else:
+                    #     new_stmt_lst.append(['ASG', lhs, rhs])
+                    new_stmt_lst.append(['ASG', lhs, rhs, check])
+                    
                     counter_lst[counter] = counter
                     counter_to_stmt[counter] = new_stmt_counter
                     stmt_to_counter[new_stmt_counter] = counter
@@ -78,7 +80,7 @@ def get_fspta_stmts(struct_dict, stmt_lst, lb = False):
         successors.pop()
 
     #TODO (Print)
-    get_stmt_graph(new_stmt_lst, successors)
+    # get_stmt_graph(new_stmt_lst, successors)
 
     return (new_stmt_lst, successors, predecessors)
 

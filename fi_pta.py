@@ -43,7 +43,7 @@ def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
     #             dot.edge(key, v, label = key2, color = color_dict[key])
     # # dot.unflatten(stagger=3)
     # dot.render('andersens', format='png', cleanup=True)
-    get_points_to_graph(ptr_dict, 'andersens')
+    save_points_to_graph(ptr_dict, 'andersens')
 
 def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
     ptr_dict = {}

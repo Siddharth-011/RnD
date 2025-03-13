@@ -1,8 +1,23 @@
 import graphviz
+import json
 
 num_colors = 9
 colorscheme = 'set19'
 
+def update_count(count):
+    count = ((count+3)%(num_colors-1) + num_colors-3)%num_colors + 1
+    return count
+
+
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
+
+def save_dict_to_json(dict, result_dest):
+    with open(result_dest, 'w') as result_file:
+        json.dump(dict, result_file, cls = SetEncoder)
 
 def nested_len_pt(ptr_dict):
     return sum(sum(len(val2) for val2 in val.values()) for val in ptr_dict.values())
@@ -49,7 +64,7 @@ def format_elem(elem):
         case 'MAL':
             return 'malloc('+elem[1]+')'
         
-def get_stmt_graph(stmt_lst, successors):
+def get_stmt_graph(stmt_lst, successors, result_file):
     dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, graph_attr={'dpi':'250'}, engine='dot')
     
     i = 0
@@ -66,7 +81,7 @@ def get_stmt_graph(stmt_lst, successors):
                 dot.edge(str(i), str(succ))
         i += 1
 
-    dot.render('doctest-output/test.gv', format='png', cleanup=True, engine='dot')
+    dot.render(result_file, format='png', cleanup=True, engine='dot')
     return dot
 
 def contains_pointer(struct, struct_dict):
@@ -102,20 +117,20 @@ def get_next_counter(ind, counter_lst):
 
     return ind
 
-def get_points_to_graph(ptr_dict, filename):
+def save_points_to_graph(ptr_dict, filename):
     count = 0
     dot = graphviz.Digraph(node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'dpi':'250'}, engine='dot')
     color_dict = {}
 
     for node in ptr_dict:
-        count = count%num_colors + 1
+        count = update_count(count)
         color_dict[node] = str(count)
         dot.node(node, color = str(count))
 
     for key, val in ptr_dict.items():
-        print(key,":")
+        # print(key,":")
         for key2, val2 in val.items():
-            print('\t',key2, '-', val2)
+            # print('\t',key2, '-', val2)
             if key2 == '*':
                 key2 = '⁎'
             for v in val2:
