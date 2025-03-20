@@ -1,5 +1,6 @@
 import graphviz
 import json
+from math import ceil, floor
 
 num_colors = 9
 colorscheme = 'set19'
@@ -17,7 +18,7 @@ class SetEncoder(json.JSONEncoder):
 
 def save_dict_to_json(dict, result_dest):
     with open(result_dest, 'w') as result_file:
-        json.dump(dict, result_file, cls = SetEncoder)
+        json.dump(dict, result_file, cls = SetEncoder, indent='\t')
 
 def nested_len_pt(ptr_dict):
     return sum(sum(len(val2) for val2 in val.values()) for val in ptr_dict.values())
@@ -65,7 +66,8 @@ def format_elem(elem):
             return 'malloc('+elem[1]+')'
         
 def get_stmt_graph(stmt_lst, successors, result_file):
-    dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, graph_attr={'dpi':'250'}, engine='dot')
+    # dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, graph_attr={'dpi':'256'}, engine='dot')
+    dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, engine='dot')
     
     i = 0
     # with dot.subgraph(name='cluster0') as c:
@@ -82,6 +84,25 @@ def get_stmt_graph(stmt_lst, successors, result_file):
         i += 1
 
     dot.render(result_file, format='png', cleanup=True, engine='dot')
+    # dot.render(result_file, format='json0', cleanup=True, engine='dot')
+
+    dpi = 72
+    dot.render('./code', format='svg', cleanup=True)
+
+    pos_dicts = {}
+    for obj in json.loads(dot.pipe(format='json0'))['objects']:
+        pos_dict = {}
+        pos_dict['h'] = ceil(float(obj['height'])*dpi)
+        pos_dict['w'] = ceil(float(obj['width'])*dpi)
+        pos = obj['pos'].split(',')
+        pos_dict['x'] = floor(((int(pos[0])+4)*dpi)/72 - pos_dict['w']/2)
+        pos_dict['y'] = ceil(((int(pos[1])+4)*dpi)/72 + pos_dict['h']/2)
+        pos_dicts[obj['name']] = pos_dict
+
+    # print(pos_dicts)
+    save_dict_to_json(pos_dicts, './position_dict.json')
+
+    raise Exception('Line 86 of helper.py (Testing)')
     return dot
 
 def contains_pointer(struct, struct_dict):

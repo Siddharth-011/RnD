@@ -35,14 +35,14 @@ else:
         os.mkdir(results_dir)
     
 
-    perform_andersens_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
-    perform_steensgaards_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
+    # perform_andersens_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
+    # perform_steensgaards_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
 
     os.mkdir(results_dir+'/fspta')
     os.mkdir(results_dir+'/fspta/pta')
     perform_fspta(struct_dict, func_dict['main'][1], func_dict['main'][2],  results_dir+'/fspta/')
 
-    os.mkdir(results_dir+'/lfcpa')
-    os.mkdir(results_dir+'/lfcpa/la')
-    os.mkdir(results_dir+'/lfcpa/pta')
-    perform_lfcpa(struct_dict, func_dict['main'][1], func_dict['main'][2], results_dir+'/lfcpa/')
+    # os.mkdir(results_dir+'/lfcpa')
+    # os.mkdir(results_dir+'/lfcpa/la')
+    # os.mkdir(results_dir+'/lfcpa/pta')
+    # perform_lfcpa(struct_dict, func_dict['main'][1], func_dict['main'][2], results_dir+'/lfcpa/')

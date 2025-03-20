@@ -1,1 +1,5 @@
 results/
+*.txt
+*.json
+*.png
+*.svg

@@ -10,4 +10,4 @@ dot.edge('B', 'L', constraint='false')
 
 print(dot.source)
 
-dot.render('doctest-output/round-table.gv', format='png', cleanup=True, engine='dot', view=True)
+dot.render('./round-table', format='svg', cleanup=True, engine='dot', view=True)
