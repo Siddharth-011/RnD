@@ -4,7 +4,7 @@ import graphviz
 def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
     ptr_dict = {}
     
-    set_dicts(var_dict, struct_dict, ptr_dict, False)
+    set_ptr_dict(var_dict, struct_dict, ptr_dict, False)
     
     new_stmt_lst = get_pta_stmts(struct_dict, stmt_lst)
 

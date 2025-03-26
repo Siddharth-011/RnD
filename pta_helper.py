@@ -1,4 +1,5 @@
 from helper import *
+from copy import deepcopy
 
 def get_fspta_stmts(struct_dict, stmt_lst, lb = False):
     new_stmt_lst = [stmt_lst[0]]
@@ -185,25 +186,20 @@ def get_def(ptr_dict, lhs, var_to_set_dict):
             fld = lhs[2]
     return (var, fld)
 
-def set_dicts(var_dict, struct_dict, ptr_dict, enable_unk = True):
+def set_ptr_dict(var_dict, struct_dict, ptr_dict, enable_unk = True):
+    int_set = set()
+    if enable_unk:
+        int_set.add('?')
+
     for var, typ in var_dict.items():
         if contains_pointer(typ, struct_dict):
             ptr_dict[var] = {}
             
-            if enable_unk:
-                if typ[-1] == '*':
-                    ptr_dict[var]['*'] = {'?',}
-                else:
-                    for field, field_typ in struct_dict[typ][0].items():
-                        if field_typ[-1] == '*':
-                            ptr_dict[var][field] = {'?',}
+            if typ[-1] == '*':
+                ptr_dict[var]['*'] = int_set.copy()
             else:
-                if typ[-1] == '*':
-                    ptr_dict[var]['*'] = set()
-                else:
-                    for field, field_typ in struct_dict[typ][0].items():
-                        if field_typ[-1] == '*':
-                            ptr_dict[var][field] = set()
+                for field in struct_dict[typ][0].keys():
+                    ptr_dict[var][field] = int_set.copy()
 
 def unify(ptr_dict, sets_to_unify, var_to_set_dict, set_to_var_dict):
     if sets_to_unify[0] == sets_to_unify[1]:
@@ -292,10 +288,10 @@ def set_lb_pin(ptr_dict_in, ptr_dicts, liveness_dict):
             if ptr not in liveness_dict[fld]:
                 continue
             for ptr_dict in ptr_dicts:
-                ptr_dict_in[ptr][fld].update(ptr_dict[ptr][fld])
+                fld_dict.update(ptr_dict[ptr][fld])
 
 def set_pout(ptr_dict_out, stmt):
-    if stmt[0] != 'ASG' or not stmt[3]:
+    if stmt[0] != 'ASG':# or not stmt[3]:
         return
     
     lhs = stmt[1]
@@ -314,6 +310,36 @@ def set_pout(ptr_dict_out, stmt):
             ptr_dict_out[su_var][su_fld].clear()
 
     for var in vars:
+        ptr_dict_out[var][fld].update(pointees)
+
+def set_lb_pout(ptr_dict_out, stmt, liveness_dict, ptr_dict_in):
+    # ptr_dict_out.clear()
+    ptr_dict_out |= deepcopy(ptr_dict_in)
+    for ptr, ptr_dict in ptr_dict_out.items():
+        for fld, pti in ptr_dict.items():
+            if ptr not in liveness_dict[fld]:
+                pti.clear()
+
+    if stmt[0] != 'ASG' or not stmt[3]:
+        return
+    
+    lhs = stmt[1]
+    rhs = stmt[2]
+
+    pointees = get_pointees(ptr_dict_in, rhs)
+    vars, fld = get_defs(ptr_dict_in, lhs)
+
+    su_vars, su_fld = get_strong_update(ptr_dict_in, lhs)
+
+    for su_var in su_vars:
+        if su_var == '$all':
+            for var in ptr_dict_out.values():
+                if su_fld in var:
+                    var[su_fld].clear()
+        else:
+            ptr_dict_out[su_var][su_fld].clear()
+    
+    for var in liveness_dict[fld].intersection(vars):
         ptr_dict_out[var][fld].update(pointees)
 
 def set_lhsref(lhsref, lhs, check = False):
@@ -355,7 +381,9 @@ def get_ref(stmt, ptr_dict, liveness_dict):
     if stmt[0] == 'ASG':
         lhs = stmt[1]
         vars, fld = get_defs(ptr_dict, lhs)
-        print(liveness_dict)
+
+        # print('Defn', fld, vars)
+        
         if liveness_dict[fld].isdisjoint(vars):
             if sum(len(x) for x in liveness_dict.values()) != 0:
                 set_lhsref(ref, lhs)
@@ -367,15 +395,32 @@ def get_ref(stmt, ptr_dict, liveness_dict):
 
     return ref
 
-def set_lin(lout, stmt, ptr_dict):
-    ref = get_ref(stmt, ptr_dict, lout)
+def set_lin(liveness_dict_in:dict, stmt, ptr_dict, liveness_dict_out):
+    ref = get_ref(stmt, ptr_dict, liveness_dict_out)
+
+    # print('Data')
+    # print(ptr_dict)
+    # print(ref)
     
+    liveness_dict_in |= deepcopy(liveness_dict_out)
+    # set_lout(liveness_dict_in, [liveness_dict_out])
+
     if (stmt[0] == 'ASG') and stmt[3]:
         vars, fld = get_strong_update(ptr_dict, stmt[1])
-        lout[fld].difference_update(vars)
+
+        # print(fld, vars)
+
+        if vars == ['$all']:
+            liveness_dict_in[fld].clear()
+        else:
+            liveness_dict_in[fld].difference_update(vars)
 
     for fld, vars in ref.items():
-        lout[fld].update(vars)
+        liveness_dict_in[fld].update(vars)
+
+    # print('Liveness')
+    # print(liveness_dict_out)
+    # print(liveness_dict_in)
 
 def set_lout(liveness_dict_out, liveness_dicts):
     for fld, fld_dict in liveness_dict_out.items():

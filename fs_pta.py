@@ -7,10 +7,10 @@ def perform_fspta(struct_dict, var_dict, stmt_lst, result_dest):
     get_stmt_graph(new_stmt_lst, successors, result_dest+'code')
 
     ptr_dicts = [{}]
-    set_dicts(var_dict, struct_dict, ptr_dicts[0])
+    set_ptr_dict(var_dict, struct_dict, ptr_dicts[0])
 
     temp_ptr_dict = {}
-    set_dicts(var_dict, struct_dict, temp_ptr_dict, False)
+    set_ptr_dict(var_dict, struct_dict, temp_ptr_dict, False)
 
     for _ in range(len(new_stmt_lst)-1):
         ptr_dicts.append(copy.deepcopy(temp_ptr_dict))

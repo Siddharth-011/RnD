@@ -107,7 +107,9 @@ def get_stmt_graph(stmt_lst, successors, result_file):
     # raise Exception('Line 105 of helper.py (Testing)')
     return dot
 
+#TODO check later
 def contains_pointer(struct, struct_dict):
+    # return struct != 'scalar'
     if struct == 'scalar':
         return False
     elif struct[-1] == '*':
@@ -169,7 +171,7 @@ def save_points_to_graph(ptr_dict, filename):
             for v in val2:
                 dot.edge(key, v, label = key2, color = color_dict[key])
     # dot.unflatten(stagger=1)
-    dot.render(filename, format='svg', cleanup=True, engine='dot')
+    dot.render(filename, format='png', cleanup=True, engine='dot')
     # f = open(filename+'.gv', 'w')
     # f.write(dot.source)
     # f.close()

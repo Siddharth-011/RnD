@@ -5,7 +5,7 @@ sta{
     sta* f
     sta* g
 }
-stb{scalar  a,d,s}
+stb{scalar*  a,d,s}
 stc{stc* x}
 
 funcs:
@@ -81,9 +81,13 @@ z = &p
 *w = z
 
 *y = &a
-use p
+//use p
 
-stb* abc
-abc = malloc()
-abc->a = a
-use abc
+
+//scalar aa
+//stb* abc
+//abc = malloc()
+//abc->a = &aa
+//use abc
+
+use p
