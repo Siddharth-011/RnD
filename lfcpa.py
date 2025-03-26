@@ -19,9 +19,9 @@ def perform_lfcpa(struct_dict, var_dict, stmt_lst, result_dest):
 
     temp_ptr_dict = {}
     set_dicts(var_dict, struct_dict, temp_ptr_dict, False)
-    temp_liveness_dict = {}
-    for fld in liveness_dicts[0]:
-        temp_liveness_dict[fld] = set()
+    # temp_liveness_dict = {}
+    # for fld in liveness_dicts[0]:
+    #     temp_liveness_dict[fld] = set()
 
     for _ in range(len(new_stmt_lst)-1):
         ptr_dicts.append(copy.deepcopy(temp_ptr_dict))

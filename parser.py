@@ -202,12 +202,17 @@ def p_stmt(p):
                 varlist.add(elem)
         if p[1][0] != p[5][0]:
             raise Exception("Type Mismatch: LHS type - '"+p[1][0]+"', RHS type - '"+p[5][0]+"' on assignment statement at line "+str(lno))
+        elif p[1][0][-1] != '*' and p[1][0] != 'scalar':
+            raise Exception("Cannot use '=' for assignment of structure. Set all the fields individually. Error at line "+str(lno))
         p[0] = ['ASG', p[1], p[5]]
     elif p[1] == 'read':
         checktype(p[3][1], 'scalar')
         p[0] = ['INP', p[3][1]]
     elif p[1] == 'use':
-        p[0] = ['USE', [checkvar(p[3][1]), p[3][1]]]
+        typ = checkvar(p[3][1])
+        if typ[-1] != '*':
+            raise Exception("Use statement can only be called on pointers. Error at line "+str(lno))
+        p[0] = ['USE', [typ, p[3][1]]]
     elif p[1] == 'goto':
         if p[3][1] != int(p[3][1]):
             raise Exception("Line numbers should be integers")

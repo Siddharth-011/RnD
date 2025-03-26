@@ -81,11 +81,11 @@ class QCodeEditor(QPlainTextEdit):
             else:
                 self.update(0, rect.y(), self.width(), rect.height())
             
-            if rect.contains(self.editor.viewport().rect()):   
-                fontSize = self.editor.currentCharFormat().font().pointSize()
-                self.font.setPointSize(fontSize)
-                self.font.setStyle(QFont.Style.StyleNormal)
-                self.updateWidth(self.line_count)
+            # if rect.contains(self.editor.viewport().rect()):   
+            #     fontSize = self.editor.currentCharFormat().font().pointSize()
+            #     self.font.setPointSize(fontSize)
+            #     self.font.setStyle(QFont.Style.StyleNormal)
+            #     self.updateWidth(self.line_count)
                 
         
     def __init__(self, font = QFont("Ubuntu Mono", 11)):                        
@@ -266,7 +266,7 @@ if __name__ == '__main__':
         
         # editor = QCodeEditor()
         editor = QCodeEditorWindow()
-        editor.resize(400,250)
+        editor.resize(400,790)
         editor.show()
     
         sys.exit(app.exec())

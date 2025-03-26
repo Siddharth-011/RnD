@@ -25,30 +25,12 @@ def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
         count += 1
 
     print("Andersens Iteration -", count, "(confirmation)")
-
-    # count = 0
-    # dot = graphviz.Digraph(comment="Andersen's PTA", node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'dpi':'250'}, engine='dot')
-    # color_dict = {}
-
-    # for node in ptr_dict.keys():
-    #     count = count%num_colors + 1
-    #     color_dict[node] = str(count)
-    #     dot.node(node, color = str(count))
-
-    # for key, val in ptr_dict.items():
-    #     print(key,":")
-    #     for key2, val2 in val.items():
-    #         print('\t',key2, '-', val2)
-    #         for v in val2:
-    #             dot.edge(key, v, label = key2, color = color_dict[key])
-    # # dot.unflatten(stagger=3)
-    # dot.render('andersens', format='png', cleanup=True)
     save_points_to_graph(ptr_dict, 'andersens')
 
 def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
     ptr_dict = {}
     isunk_ptr_dict = {}
-    var_to_set_dict = {}
+    var_to_set_dict = {None:None, }
     set_to_var_dict = {}
 
     for var, typ in var_dict.items():
@@ -79,16 +61,16 @@ def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
             if pointee is None:
                 continue
 
-            pointee = var_to_set_dict[pointee]
+            # pointee = var_to_set_dict[pointee]
             # print(pointee)
-            var, fld = get_def(ptr_dict, lhs)
+            var, fld = get_def(ptr_dict, lhs, var_to_set_dict)
             # print(ptr_dict)
             # print(var_to_set_dict)
 
             if var == None:
                 continue
 
-            var = var_to_set_dict[var]
+            # var = var_to_set_dict[var]
             old_var = ptr_dict[var][fld]
             if old_var is None:
                 ptr_dict[var][fld] = pointee
@@ -100,25 +82,25 @@ def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
     print("Steensgaard Iteration -", count, "(confirmation)")
 
     count = 0
-    dot = graphviz.Digraph(comment="Steensgaard's PTA", node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'dpi':'250'}, engine='dot')
+    dot = graphviz.Digraph(comment="Steensgaard's PTA", node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'bgcolor':'transparent'}, engine='dot')
     color_dict = {}
 
     for node in ptr_dict.keys():
-        count = count%num_colors + 1
+        count = update_count(count)
         color_dict[node] = str(count)
         vars = '\n'.join(set_to_var_dict[node])
         dot.node(node, vars, color = str(count))
 
     for key, val in ptr_dict.items():
-        print(key,":")
+        # print(key,":")
         for key2, val2 in val.items():
             if val2 is None:
                 continue
-            print('\t',key2, '-', var_to_set_dict[val2])
+            # print('\t',key2, '-', var_to_set_dict[val2])
             if key2 == '*':
                 dot.edge(key, var_to_set_dict[val2], label = '⁎', color = color_dict[key])
             else:
                 dot.edge(key, var_to_set_dict[val2], label = key2, color = color_dict[key])
-    print(set_to_var_dict)
+    # print(set_to_var_dict)
 
-    dot.render('steensgaard', format='png', cleanup=True)
+    dot.render('steensgaard', format='svg', cleanup=True)

@@ -144,42 +144,44 @@ def get_pointees(ptr_dict, rhs):
 
 def get_pointee(ptr_dict, rhs, var_to_set_dict):
     pointee = None
+    rhs_var = var_to_set_dict[rhs[1]]
     match rhs[0]:
         case 'ADR':
             # pointees.add(rhs[1])
-            pointee = rhs[1]
+            pointee = rhs_var
         case 'VAR':
-            pointee = ptr_dict[rhs[1]]['*']
+            pointee = var_to_set_dict[ptr_dict[rhs_var]['*']]
         case 'PTR':
-            pointee = ptr_dict[rhs[1]]['*']
+            pointee = ptr_dict[rhs_var]['*']
             if pointee != None:
-                pointee = ptr_dict[var_to_set_dict[pointee]]['*']
+                pointee = var_to_set_dict[ptr_dict[var_to_set_dict[pointee]]['*']]
         case 'FLP':
-            pointee = ptr_dict[rhs[1]]['*']
+            pointee = ptr_dict[rhs_var]['*']
             if pointee != None:
                 fld = rhs[2]
-                pointee = ptr_dict[var_to_set_dict[pointee]][fld]
+                pointee = var_to_set_dict[ptr_dict[var_to_set_dict[pointee]][fld]]
         case 'FLD':
-            pointee = ptr_dict[rhs[1]][rhs[2]]
+            pointee = var_to_set_dict[ptr_dict[rhs_var][rhs[2]]]
         case 'MAL':
-            pointee = rhs[1]
+            pointee = rhs_var
     return pointee
 
-def get_def(ptr_dict, lhs):
+def get_def(ptr_dict, lhs, var_to_set_dict):
     var = None
     fld = ''
+    lhs_var = var_to_set_dict[lhs[1]]
     match lhs[0]:
         case 'VAR':
-            var = lhs[1]
+            var = lhs_var
             fld = '*'
         case 'PTR':
-            var = ptr_dict[lhs[1]]['*']
+            var = var_to_set_dict[ptr_dict[lhs_var]['*']]
             fld = '*'
         case 'FLP':
-            var = ptr_dict[lhs[1]]['*']
+            var = var_to_set_dict[ptr_dict[lhs_var]['*']]
             fld = lhs[2]
         case 'FLD':
-            var = lhs[1]
+            var = lhs_var
             fld = lhs[2]
     return (var, fld)
 
@@ -353,7 +355,7 @@ def get_ref(stmt, ptr_dict, liveness_dict):
     if stmt[0] == 'ASG':
         lhs = stmt[1]
         vars, fld = get_defs(ptr_dict, lhs)
-
+        print(liveness_dict)
         if liveness_dict[fld].isdisjoint(vars):
             if sum(len(x) for x in liveness_dict.values()) != 0:
                 set_lhsref(ref, lhs)

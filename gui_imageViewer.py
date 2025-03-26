@@ -200,7 +200,7 @@ if __name__ == '__main__':
         editor = QImageWindow('./code.svg', json.loads(cnts))
         # editor.addWidget(editor1)
         # editor.addWidget(editor2)
-        # editor.resize(400,250)
+        editor.resize(255,790)
         editor.show()
     
         sys.exit(app.exec())

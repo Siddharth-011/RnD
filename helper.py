@@ -6,7 +6,9 @@ num_colors = 9
 colorscheme = 'set19'
 
 def update_count(count):
-    count = ((count+3)%(num_colors-1) + num_colors-3)%num_colors + 1
+    # count = (((count+3)%num_colors)%(num_colors-1) + num_colors-3)%num_colors + 1
+    # count = ((count+3)%num_colors)%(num_colors-1)+1
+    count = 1 + (count == 5) + (count!=num_colors)*count
     return count
 
 
@@ -67,7 +69,7 @@ def format_elem(elem):
         
 def get_stmt_graph(stmt_lst, successors, result_file):
     # dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, graph_attr={'dpi':'256'}, engine='dot')
-    dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, engine='dot')
+    dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, graph_attr={'bgcolor':'transparent'}, engine='dot')
     
     i = 0
     # with dot.subgraph(name='cluster0') as c:
@@ -83,11 +85,11 @@ def get_stmt_graph(stmt_lst, successors, result_file):
                 dot.edge(str(i), str(succ))
         i += 1
 
-    dot.render(result_file, format='png', cleanup=True, engine='dot')
+    dot.render(result_file, format='svg', cleanup=True, engine='dot')
     # dot.render(result_file, format='json0', cleanup=True, engine='dot')
 
     dpi = 72
-    dot.render('./code', format='svg', cleanup=True)
+    dot.render('./code', format='svg', cleanup=True, engine='dot')
 
     pos_dicts = {}
     for obj in json.loads(dot.pipe(format='json0'))['objects']:
@@ -95,14 +97,14 @@ def get_stmt_graph(stmt_lst, successors, result_file):
         pos_dict['h'] = ceil(float(obj['height'])*dpi)
         pos_dict['w'] = ceil(float(obj['width'])*dpi)
         pos = obj['pos'].split(',')
-        pos_dict['x'] = floor(((int(pos[0])+4)*dpi)/72 - pos_dict['w']/2)
-        pos_dict['y'] = ceil(((int(pos[1])+4)*dpi)/72 + pos_dict['h']/2)
+        pos_dict['x'] = floor(((float(pos[0])+4)*dpi)/72 - pos_dict['w']/2)
+        pos_dict['y'] = ceil(((float(pos[1])+4)*dpi)/72 + pos_dict['h']/2)
         pos_dicts[obj['name']] = pos_dict
 
     # print(pos_dicts)
     save_dict_to_json(pos_dicts, './position_dict.json')
 
-    raise Exception('Line 86 of helper.py (Testing)')
+    # raise Exception('Line 105 of helper.py (Testing)')
     return dot
 
 def contains_pointer(struct, struct_dict):
@@ -138,9 +140,19 @@ def get_next_counter(ind, counter_lst):
 
     return ind
 
+# def get_color_dict(ptr_dict):
+#     count = 0
+#     color_dict = {}
+
+#     for node in ptr_dict:
+#         count = update_count(count)
+#         color_dict[node] = str(count)
+
+#     return color_dict
+
 def save_points_to_graph(ptr_dict, filename):
     count = 0
-    dot = graphviz.Digraph(node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'dpi':'250'}, engine='dot')
+    dot = graphviz.Digraph(node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'bgcolor':'transparent'}, engine='dot')
     color_dict = {}
 
     for node in ptr_dict:
@@ -156,5 +168,8 @@ def save_points_to_graph(ptr_dict, filename):
                 key2 = '⁎'
             for v in val2:
                 dot.edge(key, v, label = key2, color = color_dict[key])
-    # dot.unflatten(stagger=3)
-    dot.render(filename, format='png', cleanup=True)
+    # dot.unflatten(stagger=1)
+    dot.render(filename, format='svg', cleanup=True, engine='dot')
+    # f = open(filename+'.gv', 'w')
+    # f.write(dot.source)
+    # f.close()

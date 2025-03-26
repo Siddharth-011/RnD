@@ -4,6 +4,7 @@ from fs_pta import perform_fspta, get_fspta_stmts
 from lfcpa  import perform_lfcpa
 import os, shutil
 
+# file_name = "test.txt"
 file_name = "test.txt"
 
 (struct_dict, func_dict) = parse_file(file_name)
@@ -35,14 +36,14 @@ else:
         os.mkdir(results_dir)
     
 
-    # perform_andersens_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
-    # perform_steensgaards_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
+    perform_andersens_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
+    perform_steensgaards_analysis(struct_dict, func_dict['main'][1], func_dict['main'][2])
 
     os.mkdir(results_dir+'/fspta')
     os.mkdir(results_dir+'/fspta/pta')
     perform_fspta(struct_dict, func_dict['main'][1], func_dict['main'][2],  results_dir+'/fspta/')
 
-    # os.mkdir(results_dir+'/lfcpa')
-    # os.mkdir(results_dir+'/lfcpa/la')
-    # os.mkdir(results_dir+'/lfcpa/pta')
-    # perform_lfcpa(struct_dict, func_dict['main'][1], func_dict['main'][2], results_dir+'/lfcpa/')
+    os.mkdir(results_dir+'/lfcpa')
+    os.mkdir(results_dir+'/lfcpa/la')
+    os.mkdir(results_dir+'/lfcpa/pta')
+    perform_lfcpa(struct_dict, func_dict['main'][1], func_dict['main'][2], results_dir+'/lfcpa/')

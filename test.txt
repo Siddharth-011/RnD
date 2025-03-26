@@ -82,3 +82,8 @@ z = &p
 
 *y = &a
 use p
+
+stb* abc
+abc = malloc()
+abc->a = a
+use abc
