@@ -393,7 +393,32 @@ def p_error(p):
     else:
         print("Syntax error at EOF")
 
+
 parser = yacc.yacc()
+
+def reset():
+    statements.clear()
+
+    global flno, lno, alno
+    flno = 0
+    lnomap.clear()
+    lno = 1
+    alno = 1
+
+    # Used for error checking
+    defstructlist.clear()
+    defstructlist.add('scalar')
+    usedstructlist.clear()
+    deffunclist.clear()
+    funcdict.clear()
+    usedfunclist.clear()
+
+    # Used for error checking
+    varlist.clear()
+    structdict.clear()
+    structdict['scalar'] = [{},set()]
+    # Saved for each function
+    vardict.clear()
 
 def parse_file(file_name):
     try:
@@ -402,9 +427,14 @@ def parse_file(file_name):
         s = f.read()
     except EOFError:
         return ({}, {'main' : 'error'})
+    
+    return parse_text(s)
 
+def parse_text(s):
+    reset()
     try:
         parser.parse(s)
+        parser.restart()
         funcdict['main'] = [[], vardict, clean_statements()]
     except Exception as X:
         print(X)

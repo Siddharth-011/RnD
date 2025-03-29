@@ -1,16 +1,22 @@
 from pta_helper import *
 import graphviz
 
-def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
+def perform_andersens_analysis(struct_dict, var_dict, stmt_lst, result_dest):
     ptr_dict = {}
     
     set_ptr_dict(var_dict, struct_dict, ptr_dict, False)
     
     new_stmt_lst = get_pta_stmts(struct_dict, stmt_lst)
+    # print(new_stmt_lst)
+    infoDict = {'pos_dicts':get_stmt_graph(new_stmt_lst, None, result_dest+'code')}
+
+    result_dest += 'pta/iter_'
 
     count = 0
     change = True
     while change:
+        save_dict_to_json(ptr_dict, result_dest+str(count))
+
         change = False
         # print("Iteration -", count)
         # print(ptr_dict)
@@ -23,11 +29,15 @@ def perform_andersens_analysis(struct_dict, var_dict, stmt_lst):
                 ptr_dict[var][fld].update(pointees)
                 change = change or (old_len != len(ptr_dict[var][fld]))
         count += 1
+    
+    save_dict_to_json(ptr_dict, result_dest+str(count))
 
     print("Andersens Iteration -", count, "(confirmation)")
-    save_points_to_graph(ptr_dict, 'andersens')
+    # save_points_to_graph(ptr_dict, 'andersens')
+    infoDict['iters'] = count
+    save_dict_to_json(infoDict, result_dest+'info.json')
 
-def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
+def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst, result_dest):
     ptr_dict = {}
     isunk_ptr_dict = {}
     var_to_set_dict = {None:None, }
@@ -47,6 +57,7 @@ def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
                         ptr_dict[var][field] = None
 
     new_stmt_lst = get_pta_stmts(struct_dict, stmt_lst)
+    infoDict = {'pos_dicts':get_stmt_graph(new_stmt_lst, None, result_dest+'code')}
 
     count = 0
     change = True
@@ -80,6 +91,9 @@ def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst):
                 change = unify(ptr_dict, sets_to_unify, var_to_set_dict, set_to_var_dict) or change
 
     print("Steensgaard Iteration -", count, "(confirmation)")
+    
+    infoDict['iters'] = count
+    save_dict_to_json(infoDict, result_dest+'info.json')
 
     count = 0
     dot = graphviz.Digraph(comment="Steensgaard's PTA", node_attr={'colorscheme':colorscheme, 'style':'filled'}, edge_attr={'colorscheme':colorscheme}, graph_attr={'rankdir':'LR', 'bgcolor':'transparent'}, engine='dot')

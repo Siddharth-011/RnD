@@ -4,21 +4,26 @@ from pta_helper import *
 def perform_lfcpa(struct_dict, var_dict, stmt_lst, result_dest):
     new_stmt_lst, successors, predecessors = get_fspta_stmts(struct_dict, stmt_lst, True)
 
-    get_stmt_graph(new_stmt_lst, successors, result_dest+'code')
+    infoDict = {'pos_dicts':get_stmt_graph(new_stmt_lst, successors, result_dest+'code')}
 
-    ptr_dicts = [{}]
-    liveness_dicts = []
-    set_ptr_dict(var_dict, struct_dict, ptr_dicts[0])
+    ptr_dicts = {}
+    # liveness_dicts = []
+    set_ptr_dict(var_dict, struct_dict, ptr_dicts)
 
     temp_liveness_dict = {}
-    for flds in ptr_dicts[0].values():
+    for flds in ptr_dicts.values():
         for fld in flds:
             if fld not in temp_liveness_dict:
                 temp_liveness_dict[fld] = set()
-    liveness_dicts.append(deepcopy(temp_liveness_dict))
+    # liveness_dicts.append(deepcopy(temp_liveness_dict))
+    temp_liveness_dict = (temp_liveness_dict, deepcopy(temp_liveness_dict))
+    liveness_dicts = [deepcopy(temp_liveness_dict)]
 
     temp_ptr_dict = {}
     set_ptr_dict(var_dict, struct_dict, temp_ptr_dict, False)
+
+    ptr_dicts = [(ptr_dicts, deepcopy(temp_ptr_dict))]
+    temp_ptr_dict = (temp_ptr_dict, deepcopy(temp_ptr_dict))
 
     # temp_liveness_dict = {}
     # for fld in liveness_dicts[0]:
@@ -37,14 +42,14 @@ def perform_lfcpa(struct_dict, var_dict, stmt_lst, result_dest):
     else:
         updt_stmt_list = new_stmt_lst
 
-    liveness_dicts = (liveness_dicts, deepcopy(liveness_dicts))
-    ptr_dicts = (ptr_dicts, deepcopy(ptr_dicts))
+    # liveness_dicts = (liveness_dicts, deepcopy(liveness_dicts))
+    # ptr_dicts = (ptr_dicts, deepcopy(ptr_dicts))
 
     iters = []
     iter = 0
     while True:
         iter += 1
-        l_iter = preform_ptbla(updt_stmt_list, successors, ptr_dicts[0], liveness_dicts, result_dest+'la/iter_'+str(iter)+'_')
+        l_iter = preform_ptbla(updt_stmt_list, successors, ptr_dicts, liveness_dicts, result_dest+'la/iter_'+str(iter)+'_')
         if l_iter == 1:
             iters.append((1,0))
             break
@@ -56,6 +61,8 @@ def perform_lfcpa(struct_dict, var_dict, stmt_lst, result_dest):
         # if iter == 2:
             # raise Exception('lfcpa')
     print("LFCPA Iteration -", len(iters), iters)
+    infoDict['iters'] = iters
+    save_dict_to_json(infoDict, result_dest+'info.json')
     # save_points_to_graph(ptr_dicts[len(updt_stmt_list)-1], result_dest)
 
 
@@ -63,30 +70,34 @@ def preform_lbpta(new_stmt_lst, predecessors, ptr_dicts, liveness_dicts, result_
     iter = 0
     change = True
     while change:
+        save_in_out_dicts_to_json(ptr_dicts, result_dest+str(iter)+'stmt_')
+
         change = False
         iter += 1
         
         stmt_no = 1
         # print('*************************************************************************************')
+
         for stmt in new_stmt_lst[1:]:
-            ptr_dict_in = ptr_dicts[0][stmt_no]
-            ptr_dict_out = ptr_dicts[1][stmt_no]
+            ptr_dict_in = ptr_dicts[stmt_no][0]
+            ptr_dict_out = ptr_dicts[stmt_no][1]
             old_len = not change and nested_len_pt(ptr_dict_out) + nested_len_pt(ptr_dict_in)
+            stmt_liveness_dicts = liveness_dicts[stmt_no]
 
             # print(stmt_no, stmt)
 
             pred_ptr_dicts = []
             for pred in predecessors[stmt_no]:
-                pred_ptr_dicts.append(ptr_dicts[1][pred])
+                pred_ptr_dicts.append(ptr_dicts[pred][1])
 
-            set_lb_pin(ptr_dict_in, pred_ptr_dicts, liveness_dicts[0][stmt_no])
-            save_points_to_graph(ptr_dict_in, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_in')
-            save_dict_to_json(ptr_dict_in, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_in.json')
+            set_lb_pin(ptr_dict_in, pred_ptr_dicts, stmt_liveness_dicts[0])
+            # save_points_to_graph(ptr_dict_in, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_in')
+            # save_dict_to_json(ptr_dict_in, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_in.json')
 
-            set_lb_pout(ptr_dict_out, stmt, liveness_dicts[1][stmt_no], ptr_dict_in)
+            set_lb_pout(ptr_dict_out, stmt, stmt_liveness_dicts[1], ptr_dict_in)
             # set_pout(ptr_dict_out, stmt)
-            save_points_to_graph(ptr_dict_out, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_out')
-            save_dict_to_json(ptr_dict_out, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_out.json')
+            # save_points_to_graph(ptr_dict_out, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_out')
+            # save_dict_to_json(ptr_dict_out, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_out.json')
 
             change = change or (old_len != (nested_len_pt(ptr_dict_out) + nested_len_pt(ptr_dict_in)))
 
@@ -94,6 +105,8 @@ def preform_lbpta(new_stmt_lst, predecessors, ptr_dicts, liveness_dicts, result_
             # print(ptr_dict_out)
 
             stmt_no += 1
+
+    save_in_out_dicts_to_json(ptr_dicts, result_dest+str(iter)+'stmt_')
 
     # print('*************************************************************************************')
     return iter
@@ -103,6 +116,9 @@ def preform_ptbla(new_stmt_lst, successors, ptr_dicts, liveness_dicts, result_de
     change = True
     
     while change:
+        # save_in_out_dicts_to_json(liveness_dicts, result_dest+str(iter)+'stmt_')
+        save_in_out_inverted_dicts_to_json(liveness_dicts, result_dest+str(iter)+'stmt_')
+
         change = False
         iter += 1
 
@@ -114,23 +130,26 @@ def preform_ptbla(new_stmt_lst, successors, ptr_dicts, liveness_dicts, result_de
 
             # print(stmt_no, stmt)
 
-            liveness_dict_in = liveness_dicts[0][stmt_no]
-            liveness_dict_out = liveness_dicts[1][stmt_no]
+            liveness_dict_in = liveness_dicts[stmt_no][0]
+            liveness_dict_out = liveness_dicts[stmt_no][1]
             old_len = not change and (nested_len_l(liveness_dict_in) + nested_len_l(liveness_dict_out))
 
             succ_liveness_dicts = []
             for succ in successors[stmt_no]:
-                succ_liveness_dicts.append(liveness_dicts[0][succ])
+                succ_liveness_dicts.append(liveness_dicts[succ][0])
 
             set_lout(liveness_dict_out, succ_liveness_dicts)
-            save_dict_to_json(liveness_dict_out, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_out.json')
+            # save_dict_to_json(liveness_dict_out, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_out.json')
             
-            set_lin(liveness_dict_in, stmt, ptr_dicts[stmt_no], liveness_dict_out)
-            save_dict_to_json(liveness_dict_in, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_in.json')
+            set_lin(liveness_dict_in, stmt, ptr_dicts[stmt_no][0], liveness_dict_out)
+            # save_dict_to_json(liveness_dict_in, result_dest+str(iter)+'stmt_'+str(stmt_no)+'_in.json')
 
             change = change or (old_len != (nested_len_l(liveness_dict_in) + nested_len_l(liveness_dict_out)))
 
             stmt_no -= 1
 
-        # raise Exception("ptlba")
+    # save_in_out_dicts_to_json(liveness_dicts, result_dest+str(iter)+'stmt_')
+    save_in_out_inverted_dicts_to_json(liveness_dicts, result_dest+str(iter)+'stmt_')
+
+    # raise Exception("ptlba")
     return iter
