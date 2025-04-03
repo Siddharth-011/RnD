@@ -222,6 +222,8 @@ class QCFGWindow(QWidget):
 
         self.setLayout(self.vBox)
 
+        self.vBox.setContentsMargins(0,0,0,0)
+
     def resetData(self, img:str, posDict:dict, hi:int|None=None):
         self.imageViewer.resetData(img, posDict, None)
 
@@ -251,6 +253,8 @@ class QPTAWindow(QWidget):
         self.vBox.addWidget(self.imageViewer)
 
         self.setLayout(self.vBox)
+
+        self.vBox.setContentsMargins(0,0,0,0)
 
     def resetImage(self, jsonPath:str):
         self.imageViewer.resetImage(get_points_to_graph_from_file(jsonPath))
@@ -299,6 +303,8 @@ class QLFCPAWidget(QWidget):
         newPTA.addWidget(text)
         newPTA.addWidget(PTAResults)
 
+        newPTA.setContentsMargins(0,0,0,0)
+
         # New LA results
         self.LinNext = QText()
         self.LoutNext = QText()
@@ -312,6 +318,8 @@ class QLFCPAWidget(QWidget):
         text.setFixedHeight(17)
         newLA.addWidget(text)
         newLA.addWidget(LResults)
+
+        newLA.setContentsMargins(0,0,0,0)
 
         # Old results
         self.PTAinOld = QPTAWindow()
@@ -333,6 +341,8 @@ class QLFCPAWidget(QWidget):
         oldDataSection = QVBoxLayout(oldDataSectionWidget)
         oldDataSection.addWidget(QLabel('Old results (in, out)'))
         oldDataSection.addWidget(oldDataSplitter)
+
+        oldDataSection.setContentsMargins(0,0,0,0)
 
         # Displayed Data
         self.dataSplitter = QSplitter(Qt.Orientation.Vertical)
@@ -368,6 +378,8 @@ class QLFCPAWidget(QWidget):
 
         self.setLayout(viewer)
 
+        viewer.setContentsMargins(0,0,0,0)
+
 
     def getPath(self, iter:int, round:int, stmt:int):
         return str(iter)+'_'+str(round)+'stmt_'+str(stmt)
@@ -387,12 +399,12 @@ class QLFCPAWidget(QWidget):
             self.PTAinOld.resetImage(self.PTAFp + self.getPath(self.currIter, newRound-1, self.currStmt) + '_in.json')
             self.PTAoutOld.resetImage(self.PTAFp + self.getPath(self.currIter, newRound-1, self.currStmt) + '_out.json')
 
-            self.LinOld.setText(self.LivenessFp + self.getPath(self.currIter, 0, self.currStmt) + '_in.json')
-            self.LoutOld.setText(self.LivenessFp + self.getPath(self.currIter, 0, self.currStmt) + '_out.json')
+            self.LinOld.setText(self.LivenessFp + self.getPath(self.currIter, self.rounds[self.currIter-1][0], self.currStmt) + '_in.json')
+            self.LoutOld.setText(self.LivenessFp + self.getPath(self.currIter, self.rounds[self.currIter-1][0], self.currStmt) + '_out.json')
 
         else:
-            self.PTAinOld.resetImage(self.PTAFp + self.getPath(self.currIter, self.rounds[self.currIter-1][0], self.currStmt) + '_in.json')
-            self.PTAoutOld.resetImage(self.PTAFp + self.getPath(self.currIter, self.rounds[self.currIter-1][0], self.currStmt) + '_out.json')
+            self.PTAinOld.resetImage(self.PTAFp + self.getPath(self.currIter, 0, self.currStmt) + '_in.json')
+            self.PTAoutOld.resetImage(self.PTAFp + self.getPath(self.currIter, 0, self.currStmt) + '_out.json')
 
             self.LinNext.setText(self.LivenessFp + self.getPath(self.currIter, newRound, self.currStmt) + '_in.json')
             self.LoutNext.setText(self.LivenessFp + self.getPath(self.currIter, newRound, self.currStmt) + '_out.json')
@@ -432,11 +444,12 @@ class QLFCPAWidget(QWidget):
             self.switchAnalysisButton.setText('LA')
             self.dataSplitter.replaceWidget(0, self.newLAWidget)
 
+        self.roundSpinBox.setValue(1)
         self.changeRound(1)
 
     def setCurrStmt(self, stmt):
         self.currStmt = stmt
-        self.changeRound(1)
+        self.changeRound(self.roundSpinBox.value())
 
 
 if __name__ == '__main__':
@@ -464,6 +477,7 @@ if __name__ == '__main__':
         # editor = QPTAWindow('/home/siddharth/Desktop/RnD/git/RnD/results/lfcpa/pta/iter_2_2stmt_8_out.json')
         # editor = QLFCPAWidget('./results/lfcpa/')
         editor = QLFCPAWidget()
+        # editor = QCFGWindow(None)
         # editor.addWidget(editor1)
         # editor.addWidget(editor2)
         editor.resize(255,790)

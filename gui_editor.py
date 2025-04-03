@@ -207,11 +207,17 @@ class QCodeEditorWindow(QWidget):
         self.buttons.addWidget(self.zoomText)
         self.buttons.addWidget(self.zoomSpinBox)
 
+        self.errorMessage = QLabel()
+        self.errorMessage.setStyleSheet("QLabel { background-color : lightgray; color : maroon; }")
+        self.errorMessage.hide()
+
         self.vBox = QVBoxLayout()
         self.vBox.addLayout(self.buttons)
         self.vBox.addWidget(self.editor)
 
         self.setLayout(self.vBox)
+
+        self.vBox.setContentsMargins(0,0,0,0)
 
     def openFile(self):
         newFilePath = QFileDialog.getOpenFileName(self, 'Open file')[0]
@@ -268,11 +274,21 @@ class QCodeEditorWindow(QWidget):
     def analyze(self):
         # self.analyzedText = self.editor.toPlainText()
         # perform_analysis(self.analyzedText)
-        perform_analysis(self.editor.toPlainText())
-        # self.analyzeButton.setEnabled(False)
-        self.parentAnalyzeFunc()
+        err = perform_analysis(self.editor.toPlainText())
+        self.vBox.removeWidget(self.errorMessage)
+        if err:
+            self.errorMessage.setText(err)
+            self.vBox.addWidget(self.errorMessage)
+            self.errorMessage.show()
+        else:
+            # self.analyzeButton.setEnabled(False)
+            self.parentAnalyzeFunc()
+            self.errorMessage.hide()
 
 if __name__ == '__main__':
+
+    def nop():
+        pass
     
     def run_test():
         
@@ -283,7 +299,7 @@ if __name__ == '__main__':
         app = QApplication([])
         
         # editor = QCodeEditor()
-        editor = QCodeEditorWindow()
+        editor = QCodeEditorWindow(nop)
         editor.resize(400,790)
         editor.show()
     

@@ -392,6 +392,7 @@ def p_error(p):
         raise Exception("Syntax error at line " + str(lno) +" at '" + str(p.value) + "'")
     else:
         print("Syntax error at EOF")
+        raise Exception("Syntax error at EOF")
 
 
 parser = yacc.yacc()
@@ -426,7 +427,8 @@ def parse_file(file_name):
         f = open(file_name, 'r')
         s = f.read()
     except EOFError:
-        return ({}, {'main' : 'error'})
+        # return ({}, {'main' : 'error'})
+        return ("Error while loading the file", {'main' : 'error'})
     
     return parse_text(s)
 
@@ -437,11 +439,13 @@ def parse_text(s):
         parser.restart()
         funcdict['main'] = [[], vardict, clean_statements()]
     except Exception as X:
-        print(X)
-        return ({}, {'main' : 'error'})
+        # print(X)
+        # return ({}, {'main' : 'error'})
+        return (str(X), {'main' : 'error'})
     
     if usedfunclist - deffunclist:
-        print("Function/s " + str(usedfunclist - deffunclist) + " used without definition")
-        return ({}, {'main' : 'error'})
+        # print("Function/s " + str(usedfunclist - deffunclist) + " used without definition")
+        # return ({}, {'main' : 'error'})
+        return ("Function/s " + str(usedfunclist - deffunclist) + " used without definition", {'main' : 'error'})
     # type: ignore
     return (structdict, funcdict)

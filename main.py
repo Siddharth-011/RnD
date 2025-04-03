@@ -9,7 +9,8 @@ def perform_analysis(file_name):
     (struct_dict, func_dict) = parse_text(file_name)
 
     if func_dict['main'] == 'error':
-        print('Resolve the errors in', file_name, 'and try again')
+        # print('Resolve the errors in', file_name, 'and try again')
+        return struct_dict
 
     else:
         # print(struct_dict)
