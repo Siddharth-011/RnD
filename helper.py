@@ -2,12 +2,14 @@ import graphviz
 import json
 from math import ceil, floor
 
+# Datatype to store the points to pairs. The first field is the pointer and the second field is the field
+PointerDict = dict[str, dict[str, set[str]]]
+LivenessDict = dict[str, set[str]]
+
 num_colors = 9
 colorscheme = 'set19'
 
 def update_count(count):
-    # count = (((count+3)%num_colors)%(num_colors-1) + num_colors-3)%num_colors + 1
-    # count = ((count+3)%num_colors)%(num_colors-1)+1
     count = 1 + (count == 5) + (count!=num_colors)*count
     return count
 
@@ -51,56 +53,15 @@ def nested_len_pt(ptr_dict):
 
 def nested_len_l(liveness_dict):
     return sum(len(val) for val in liveness_dict.values())
-
-def format_stmt(stmt):
-    match stmt[0]:
-        case 'ASG':
-            return format_elem(stmt[1])+' = '+format_elem(stmt[2])
-        # case 'GOT':
-        #     return 'goto '+str(stmt[1])
-        case 'IF':
-            return 'if '+format_elem(stmt[1])
-        case 'CAL':
-            return 'call '+stmt[1]
-        # case 'INP':
-        #     return 'read '+stmt[1]
-        case 'USE':
-            return 'use '+stmt[1]
-        case _:
-            if len(stmt)==2:
-                return format_elem(stmt[0])+' = '+format_elem(stmt[1])
-            return stmt[0]
-
-def format_elem(elem):
-    match elem[0]:
-        case 'VAR':
-            return elem[1]
-        case 'PTR':
-            return '*'+elem[1]
-        case 'FLP':
-            return elem[1]+'->'+elem[2]
-        case 'FLD':
-            return elem[1]+'.'+elem[2]
-        case 'ADR':
-            return '&'+elem[1]
-        case 'NUM':
-            num = str(elem[1])
-            if num[-1]=='0':
-                return num[:-2]
-            return num
-        case 'BEX':
-            return format_elem(elem[2])+elem[1]+format_elem(elem[3])
-        case 'MAL':
-            return 'malloc('+elem[1]+')'
         
 def get_stmt_graph(stmt_lst, successors, result_file):
-    # dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, graph_attr={'dpi':'256'}, engine='dot')
     dot = graphviz.Digraph(comment="stmt_graph", node_attr={'shape':'box'}, graph_attr={'bgcolor':'transparent'}, engine='dot')
     
     i = 0
     # with dot.subgraph(name='cluster0') as c:
     for stmt in stmt_lst:
-        dot.node(str(i), format_stmt(stmt))
+        # dot.node(str(i), format_stmt(stmt))
+        dot.node(str(i), stmt.get_display_stmt())
         i += 1
         # c.attr(label = 'Hello')
 
@@ -119,7 +80,6 @@ def get_stmt_graph(stmt_lst, successors, result_file):
     # dot.render(result_file, format='json0', cleanup=True, engine='dot')
 
     dpi = 72
-    # dot.render('./code', format='svg', cleanup=True, engine='dot')
 
     pos_dicts = {}
     for obj in json.loads(dot.pipe(format='json0'))['objects']:
@@ -131,15 +91,10 @@ def get_stmt_graph(stmt_lst, successors, result_file):
         pos_dict['y'] = ceil(((float(pos[1])+4)*dpi)/72 + pos_dict['h']/2)
         pos_dicts[obj['name']] = pos_dict
 
-    # print(pos_dicts)
-    # save_dict_to_json(pos_dicts, result_file+'.json')
-
-    # raise Exception('Line 105 of helper.py (Testing)')
     return pos_dicts
 
 #TODO check later
 def contains_pointer(struct, struct_dict):
-    # return struct != 'scalar'
     if struct == 'scalar':
         return False
     elif struct[-1] == '*':
@@ -193,22 +148,15 @@ def save_points_to_graph(ptr_dict:dict, filename:str|None):
         dot.node(node, color = str(count))
 
     for key, val in ptr_dict.items():
-        # print(key,":")
         for key2, val2 in val.items():
-            # print('\t',key2, '-', val2)
             if key2 == '*':
                 key2 = '⁎'
             for v in val2:
                 dot.edge(key, v, label = key2, color = color_dict[key])
-    # dot = dot.unflatten(stagger=2)
     if filename:
         dot.render(filename, format='png', cleanup=True)
-        # dot.unflatten(stagger=3, chain=4).render(filename, format='png', cleanup=True)
     else:
         return dot.pipe(format='svg')
-    # f = open(filename+'.gv', 'w')
-    # f.write(dot.source)
-    # f.close()
 
 def get_points_to_graph_from_file(input_filename:str, output_filename:str|None = None):
     with open(input_filename, 'r') as input_file:

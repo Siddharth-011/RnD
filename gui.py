@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QSplitter, QApplication
-
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QApplication
+from guiHelper import QSplitter
 from gui_imageViewer import QLFCPAWidget, QCFGWindow
 from gui_editor import QCodeEditorWindow
 import sys
@@ -37,25 +37,9 @@ if __name__ == '__main__':
     app = QApplication([])
     window = QWidget()
 
-    # f = open('./position_dict.json', 'r')
-    # cnts = f.read()
-    # f.close()
-
-    # editor = QCodeEditorWindow()
-    # cfgWindow = QCFGWindow('./code.svg', json.loads(cnts))
-
-    # results = QLFCPAWidget('./results/lfcpa/')
-
-    # splitter = QSplitter(Qt.Orientation.Horizontal)
-    # splitter.addWidget(editor)
-    # splitter.addWidget(cfgWindow)
-    # splitter.addWidget(results)
-
-    # hbox = QHBoxLayout(window)
-    # hbox.addWidget(splitter)
-    # window.setLayout(hbox)
     window = QApp()
     window.setWindowTitle('PTA-Viz')
+    window.resize(1800, 900)
 
     window.show()
     sys.exit(app.exec())

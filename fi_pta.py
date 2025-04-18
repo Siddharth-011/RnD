@@ -7,7 +7,7 @@ def perform_andersens_analysis(struct_dict, var_dict, stmt_lst, result_dest):
     set_ptr_dict(var_dict, struct_dict, ptr_dict, False)
     
     new_stmt_lst = get_pta_stmts(struct_dict, stmt_lst)
-    # print(new_stmt_lst)
+
     infoDict = {'pos_dicts':get_stmt_graph(new_stmt_lst, None, result_dest+'code')}
 
     result_dest += 'pta/iter_'
@@ -18,11 +18,13 @@ def perform_andersens_analysis(struct_dict, var_dict, stmt_lst, result_dest):
         save_dict_to_json(ptr_dict, result_dest+str(count))
 
         change = False
-        # print("Iteration -", count)
-        # print(ptr_dict)
-        for (lhs, rhs) in new_stmt_lst:
+
+        for stmt in new_stmt_lst:
+            lhs = stmt.get_lhs()
+            rhs = stmt.get_rhs()
+            
             pointees = get_pointees(ptr_dict, rhs)
-            # print(pointees)
+
             vars, fld = get_defs(ptr_dict, lhs)
             for var in vars:
                 old_len = len(ptr_dict[var][fld])
@@ -33,7 +35,7 @@ def perform_andersens_analysis(struct_dict, var_dict, stmt_lst, result_dest):
     save_dict_to_json(ptr_dict, result_dest+str(count))
 
     print("Andersens Iteration -", count, "(confirmation)")
-    # save_points_to_graph(ptr_dict, 'andersens')
+
     infoDict['iters'] = count
     save_dict_to_json(infoDict, result_dest+'info.json')
 
@@ -64,24 +66,22 @@ def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst, result_dest):
 
     while change:
         change = False
-        # print("Iteration -",count)
+
         count += 1
-        for (lhs, rhs) in new_stmt_lst:
+        for stmt in new_stmt_lst:
+            lhs = stmt.get_lhs()
+            rhs = stmt.get_rhs()
+
             pointee = get_pointee(ptr_dict, rhs, var_to_set_dict)
 
             if pointee is None:
                 continue
 
-            # pointee = var_to_set_dict[pointee]
-            # print(pointee)
             var, fld = get_def(ptr_dict, lhs, var_to_set_dict)
-            # print(ptr_dict)
-            # print(var_to_set_dict)
 
             if var == None:
                 continue
 
-            # var = var_to_set_dict[var]
             old_var = ptr_dict[var][fld]
             if old_var is None:
                 ptr_dict[var][fld] = pointee
@@ -106,15 +106,13 @@ def perform_steensgaards_analysis(struct_dict, var_dict, stmt_lst, result_dest):
         dot.node(node, vars, color = str(count))
 
     for key, val in ptr_dict.items():
-        # print(key,":")
         for key2, val2 in val.items():
             if val2 is None:
                 continue
-            # print('\t',key2, '-', var_to_set_dict[val2])
+
             if key2 == '*':
                 dot.edge(key, var_to_set_dict[val2], label = '⁎', color = color_dict[key])
             else:
                 dot.edge(key, var_to_set_dict[val2], label = key2, color = color_dict[key])
-    # print(set_to_var_dict)
 
     dot.render('steensgaard', format='svg', cleanup=True)

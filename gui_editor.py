@@ -1,7 +1,7 @@
 from PyQt6.QtCore import Qt, QRect
-from PyQt6.QtWidgets import QWidget, QTextEdit, QPlainTextEdit, QHBoxLayout, QVBoxLayout, QLabel, QFileDialog
+from PyQt6.QtWidgets import QWidget, QTextEdit, QPlainTextEdit, QHBoxLayout, QVBoxLayout, QFileDialog
 from PyQt6.QtGui import QColor, QPainter, QFont, QTextFormat, QTextCursor
-from guiHelper import QPushButton, QSpinBox
+from guiHelper import QPushButton, QSpinBox, QLabel, QL
 from main import perform_analysis
 
  
@@ -133,14 +133,9 @@ class QCodeEditor(QPlainTextEdit):
 
             temp_cursor = QTextCursor(self.textCursor().block())
             hi_selections = []
-            # temp_cursor.movePosition(QTextCursor.MoveOperation.EndOfLine)
             hi_selection = QTextEdit.ExtraSelection() 
             hi_selection.format.setBackground(self.currentLineColor)
             hi_selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
-
-            # temp_cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor)
-            # temp_cursor.movePosition(QTextCursor.MoveOperation.StartOfLine, QTextCursor.MoveMode.KeepAnchor)
-            # temp_cursor.movePosition(QTextCursor.MoveOperation.Down, QTextCursor.MoveMode.KeepAnchor)
 
             hi_selection.cursor = temp_cursor
             hi_selections.append(hi_selection)
@@ -148,8 +143,6 @@ class QCodeEditor(QPlainTextEdit):
 
             while check and not temp_cursor.atBlockStart():
                 hi_selection = QTextEdit.ExtraSelection(hi_selection) 
-                # hi_selection.format.setBackground(self.currentLineColor)
-                # hi_selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
                 hi_selection.cursor = temp_cursor
                 hi_selections.append(hi_selection)
                 check = temp_cursor.movePosition(QTextCursor.MoveOperation.Down)
@@ -182,19 +175,10 @@ class QCodeEditorWindow(QWidget):
         self.saveAsButton = QPushButton('SaveAs', self.saveAsFile, self)
         self.analyzeButton = QPushButton('Analyze', self.analyze, self)
 
-        # self.openButton.clicked.connect(self.openFile)
         self.saveButton.setEnabled(False)
-        # self.saveButton.clicked.connect(self.saveFile)
-        # self.saveAsButton.clicked.connect(self.saveAsFile)
 
         self.zoomText = QLabel('Font:', self)
-        self.zoomText.setFixedWidth(self.fontMetrics().horizontalAdvance('Font:'))
         self.zoomSpinBox = QSpinBox(self.updateFontSize, initialFontSize, 5, 150, parent=self)
-        # self.zoomSpinBox.setValue(initialFontSize)
-        # self.zoomSpinBox.setMinimum(5)
-        # self.zoomSpinBox.setMaximum(150)
-
-        # self.zoomSpinBox.valueChanged.connect(self.updateFontSize)
 
         self.buttons = QHBoxLayout()
         self.buttons.addWidget(self.openButton)
@@ -207,7 +191,7 @@ class QCodeEditorWindow(QWidget):
         self.buttons.addWidget(self.zoomText)
         self.buttons.addWidget(self.zoomSpinBox)
 
-        self.errorMessage = QLabel()
+        self.errorMessage = QL()
         self.errorMessage.setStyleSheet("QLabel { background-color : lightgray; color : maroon; }")
         self.errorMessage.hide()
 
@@ -238,7 +222,6 @@ class QCodeEditorWindow(QWidget):
     def updateAnalyzeSaveButtons(self):
         if self.filePath:
             self.saveButton.setEnabled(self.text!=self.editor.toPlainText())
-        # self.analyzeButton.setEnabled(self.analyzedText!=self.editor.toPlainText())
 
     def saveFile(self):
         try:
@@ -272,8 +255,6 @@ class QCodeEditorWindow(QWidget):
         self.editor.updateFont(self.editorFont)
 
     def analyze(self):
-        # self.analyzedText = self.editor.toPlainText()
-        # perform_analysis(self.analyzedText)
         err = perform_analysis(self.editor.toPlainText())
         self.vBox.removeWidget(self.errorMessage)
         if err:
@@ -281,7 +262,6 @@ class QCodeEditorWindow(QWidget):
             self.vBox.addWidget(self.errorMessage)
             self.errorMessage.show()
         else:
-            # self.analyzeButton.setEnabled(False)
             self.parentAnalyzeFunc()
             self.errorMessage.hide()
 
@@ -298,7 +278,6 @@ if __name__ == '__main__':
        
         app = QApplication([])
         
-        # editor = QCodeEditor()
         editor = QCodeEditorWindow(nop)
         editor.resize(400,790)
         editor.show()

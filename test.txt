@@ -10,15 +10,16 @@ stc{stc* x}
 
 funcs:
 func( scalar a, scalar b ){
+    scalar c
     a = 10
     if a<10 goto 17
-    if a goto 15
+    if b goto 15
     sta* x,y
     goto 21
 
     goto 23
 
-    goto 19
+    goto 25
 
     goto 17
     x = y
@@ -26,68 +27,12 @@ func( scalar a, scalar b ){
 
 
 main:
-//sta* p, q, x, y
-//sta a, b
-//
-//p = malloc()
-//q = malloc()
-//p->f = q
-////q = p
-//p->f = &a
-//p = &b
-//
-//x = p
-//y = malloc()
-//
-//x->g = y
-//y->g = &a
-
-
-//scalar a,b,c,d, z
-//scalar* q,r,e
-//scalar** p
-//if 10<20 goto 56
-//
-//p = &q
-//q = &a
-//r = &c
-//
-//goto 60
-//
-//p = &r
-//q = &b
-//r = &d
-//
-//e = *p
-
-scalar a
-scalar* p,q,r
-scalar** x,y,z
-scalar*** w
-
-w = &y
-y = &q
-
-if a goto 78
-
-x = &p
-z = &r
-*w = x
-
-goto 82
-
-x = &r
-z = &p
-*w = z
-
-*y = &a
-//use p
-
-
-//scalar aa
-//stb* abc
-//abc = malloc()
-//abc->a = &aa
-//use abc
-
-use p
+    scalar a
+    scalar d
+    scalar* x
+    call func(a,d)
+    read a
+    use x
+    a = a<d
+    *x = a
+    x = malloc()

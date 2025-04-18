@@ -52,5 +52,3 @@ def perform_fspta(struct_dict, var_dict, stmt_lst, result_dest):
 
     infoDict['iters'] = iter
     save_dict_to_json(infoDict, result_dest+'info.json')
-
-    # save_points_to_graph(ptr_dicts[-1], 'fspta')

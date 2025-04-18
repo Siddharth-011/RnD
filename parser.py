@@ -1,5 +1,6 @@
 import ply.yacc as yacc
 from scanner import tokens
+from stmt_helper import *
 
 precedence = (
     ('left', 'NUMBER'),
@@ -8,7 +9,6 @@ precedence = (
     ('nonassoc', 'LVL2'),
 )
 
-#TODO
 # list of statements
 statements = []
 
@@ -40,35 +40,38 @@ def prepare_next_function():
     varlist.clear()
     vardict.clear()
 
-def checkvar(var):
-    if var not in varlist:
-        raise Exception("Variable '"+ var +"' used without initialization, at line number "+ str(lno))
-    return vardict[var]
+def checkvar(var:variable):
+    varName = var.get_display_value()
+    if varName not in varlist:
+        raise Exception("Variable '"+ varName +"' used without initialization, at line number "+ str(lno))
+    return vardict[varName]
 
-def checktype(var, typ):
+def checktype(var:variable, typ:str):
     if checkvar(var) != typ:
-        raise Exception("Type Error: Variable '"+ var +"' expected to be '"+ typ +"', but got '"+ vardict[var] +"' instead, at line number "+ str(lno))
+        raise Exception("Type Error: Variable '"+ var.get_display_value() +"' expected to be '"+ typ +"', but got '"+ vardict[var.get_display_value()] +"' instead, at line number "+ str(lno))
 
-def checkfield(var, field):
+def checkfield(var:variable, field:variable):
     typ = checkvar(var)
     if typ[-1] == '*':
-        raise Exception("Type Error: Variable '"+ var +"' expected to be a structure, but got a structure pointer ('"+ typ +"') instead, at line number "+ str(lno))
+        raise Exception("Type Error: Variable '"+ var.get_display_value() +"' expected to be a structure, but got a structure pointer ('"+ typ +"') instead, at line number "+ str(lno))
     if typ == 'scalar':
-        raise Exception("Type Error: Tried to access a field of a scalar variable '"+ var+"' at line number "+str(lno))
-    if field not in structdict[typ][1]:
-        raise Exception("Type Error: '"+ var +"' is not a field of structure '"+ typ +"', at line number "+ str(lno))
-    return structdict[typ][0][field]
+        raise Exception("Type Error: Tried to access a field of a scalar variable '"+ var.get_display_value() +"' at line number "+str(lno))
+    fieldName = field.get_display_value()
+    if fieldName not in structdict[typ][1]:
+        raise Exception("Type Error: '"+ fieldName +"' is not a field of structure '"+ typ +"', at line number "+ str(lno))
+    return structdict[typ][0][fieldName]
 
-def checkptrfield(var, field):
+def checkptrfield(var:variable, field:variable):
     typ = checkvar(var)
     if typ[-1] != '*':
-        raise Exception("Type Error: Variable '"+ var +"' expected to be a structure pointer, but got a structure ('"+ typ +"') instead, at line number "+ str(lno))
+        raise Exception("Type Error: Variable '"+ var.get_display_value() +"' expected to be a structure pointer, but got a structure ('"+ typ +"') instead, at line number "+ str(lno))
     typ = typ[:-1]
     if typ == 'scalar':
-        raise Exception("Type Error: Tried to access a field of a scalar pointer '"+ var+"' at line number "+str(lno))
-    if field not in structdict[typ][1]:
-        raise Exception("Type Error: '"+ var +"' is not a field of structure '"+ typ +"', at line number "+ str(lno))
-    return structdict[typ][0][field]
+        raise Exception("Type Error: Tried to access a field of a scalar pointer '"+ var.get_display_value() +"' at line number "+str(lno))
+    fieldName = field.get_display_value()
+    if fieldName not in structdict[typ][1]:
+        raise Exception("Type Error: '"+ fieldName +"' is not a field of structure '"+ typ +"', at line number "+ str(lno))
+    return structdict[typ][0][fieldName]
     
 def param_to_string(lst):
     op = '('
@@ -82,20 +85,21 @@ def param_to_string(lst):
 def clean_statements():
     alno = 1
     lnomap.extend([lnomap[-1]+1]*(lno-flno+1-len(lnomap)))
-    # print(0, ['START'])
     for s in statements:
-        if s[0] == 'IF':
-            if s[2]>lno or s[2]<flno:
+        if s.is_stmt_type(stmt_types.IF):
+            goto_lno = s.get_lno()
+            if goto_lno>lno or goto_lno<flno:
                 raise Exception("Target line number not in the range of function at line "+str(len(lnomap)-lnomap[::-1].index(alno)+flno-1))
-            s[2] = lnomap[s[2]-flno]
-        elif s[0] == 'GOT':
-            if s[1]>lno or s[1]<flno:
+            s.set_lno(lnomap[goto_lno-flno])
+        elif s.is_stmt_type(stmt_types.GOT):
+            goto_lno = s.get_lno()
+            if goto_lno>lno or goto_lno<flno:
                 raise Exception("Target line number not in the range of function at line "+str(len(lnomap)-lnomap[::-1].index(alno)+flno-1))
-            s[1] = lnomap[s[1]-flno]
-        # print(alno, s)
+            s.set_lno(lnomap[goto_lno-flno])
+
         alno = alno+1
-    # print(alno, ['END'])
-    return [['START']] + statements + [['END']]
+
+    return [plain_text('START')] + statements + [plain_text('END')]
 
 
 def p_space(p):
@@ -122,27 +126,28 @@ def p_bool_exp(p):
                | VARNAME boolop NUMBER
                | NUMBER boolop VARNAME
                | NUMBER boolop NUMBER'''
-    p[0] = ['scalar', ['BEX', p[2], p[1], p[3]]]
-    if p[1][0] == 'VAR':
-        checktype(p[1][1], 'scalar')
-    if p[3][0] == 'VAR':
-        checktype(p[3][1], 'scalar')
+    p[0] = boolExp(p[1], p[3], p[2])
+
+    if p[1].is_elem_type(elem_types.VAR):
+        checktype(p[1], 'scalar')
+    if p[3].is_elem_type(elem_types.VAR):
+        checktype(p[3], 'scalar')
 
 def p_lhs(p):
     '''lhs : STARS VARNAME
            | VARNAME "-" ">" VARNAME
            | VARNAME "." VARNAME'''
-    if '*' in p[1]:
-        typ = checkvar(p[2][1])
+    if isinstance(p[1], str):
+        typ = checkvar(p[2])
         if p[1] != '*':
             raise Exception("A variable can be dereferenced only once in a single statement, line "+str(lno))
         if typ[-1] != '*':
-            raise Exception("Tried to dereference a non pointer '"+p[2][1]+"' at line "+str(lno))
-        p[0] = [typ[:-1], ['PTR', p[2][1]]]
+            raise Exception("Tried to dereference a non pointer '"+p[2].get_display_value()+"' at line "+str(lno))
+        p[0] = [typ[:-1], pointer(p[2])]
     elif p[2] == '-':
-        p[0] = [checkptrfield(p[1][1], p[4][1]), ['FLP', p[1][1], p[4][1]]]
+        p[0] = [checkptrfield(p[1], p[4]), fieldPointer(p[1], p[4])]
     else:
-        p[0] = [checkfield(p[1][1], p[3][1]), ['FLD', p[1][1], p[3][1]]]
+        p[0] = [checkfield(p[1], p[3]), field(p[1], p[3])]
     
 def p_rhs(p):
     '''rhs : boolexp
@@ -151,24 +156,24 @@ def p_rhs(p):
            | "&" VARNAME
            | NUMBER'''
     if len(p)==3:
-        p[0] = [checkvar(p[2][1])+'*', ['ADR', p[2][1]]]
-    elif p[1][0] == 'NUM':
-        p[0] = ['scalar', p[1]]
-    elif p[1][0] == 'VAR':
-        p[0] = [checkvar(p[1][1]), p[1]]
-    else:
+        p[0] = [checkvar(p[2])+'*', address(p[2])]
+    elif isinstance(p[1], list):
         p[0] = p[1]
+    elif p[1].is_elem_type(elem_types.VAR):
+        p[0] = [checkvar(p[1]), p[1]]
+    else:
+        p[0] = ['scalar', p[1]]
 
 def p_var_dec(p):
     '''vardec : VARNAME SPACES list
               | VARNAME STARS SPACES list'''
-    if p[1][1] not in defstructlist:
-        raise Exception("Structure '" + p[1][1] + "' used without definition at line "+str(lno))
+    if p[1].get_display_value() not in defstructlist:
+        raise Exception("Structure '" + p[1].get_display_value() + "' used without definition at line "+str(lno))
     if len(p) == 5:
-        typ = p[1][1] + p[2]
+        typ = p[1].get_display_value() + p[2]
         lst = p[4]
     else:
-        typ = p[1][1]
+        typ = p[1].get_display_value()
         lst = p[3]
     if varlist.intersection(lst):
         raise Exception("Redeclaration of variable/s "+str(varlist.intersection(lst))+" at line number "+str(lno))
@@ -191,44 +196,44 @@ def p_stmt(p):
     if len(p) == 2:
         return
     elif p[3] == '=':
-        if p[1][0] == 'VAR':
-            p[1] = [checkvar(p[1][1]), p[1]]
+        if isinstance(p[1], variable):
+            p[1] = [checkvar(p[1]), p[1]]
             if len(p) == 8:
                 if p[1][0][-1] != '*':
                     raise Exception("Malloc can only be called when lhs is a pointer, at line "+str(lno))
                 elem = '$o'+str(lno)
-                p[5] = [p[1][0], ['MAL', elem]]
+                p[5] = [p[1][0], malloc(elem)]
                 vardict[elem] = p[1][0][:-1]
                 varlist.add(elem)
+
         if p[1][0] != p[5][0]:
             raise Exception("Type Mismatch: LHS type - '"+p[1][0]+"', RHS type - '"+p[5][0]+"' on assignment statement at line "+str(lno))
         elif p[1][0][-1] != '*' and p[1][0] != 'scalar':
             raise Exception("Cannot use '=' for assignment of structure. Set all the fields individually. Error at line "+str(lno))
-        p[0] = ['ASG', p[1], p[5]]
+        
+        p[0] = assignment(p[1][1], p[5][1], p[1][0])
     elif p[1] == 'read':
-        checktype(p[3][1], 'scalar')
-        p[0] = ['INP', p[3][1]]
+        checktype(p[3], 'scalar')
+        p[0] = input(p[3])
     elif p[1] == 'use':
-        typ = checkvar(p[3][1])
+        typ = checkvar(p[3])
         if typ[-1] != '*':
             raise Exception("Use statement can only be called on pointers. Error at line "+str(lno))
-        p[0] = ['USE', [typ, p[3][1]]]
+        p[0] = use(p[3])
     elif p[1] == 'goto':
-        if p[3][1] != int(p[3][1]):
+        if p[3].is_not_int():
             raise Exception("Line numbers should be integers")
-        p[0] = ['GOT', int(p[3][1])]
+        p[0] = goto(p[3])
     elif p[1] == 'call':
-        p[0] = ['CAL', p[3][1]+param_to_string(p[4][0]), p[4][1]]
-        usedfunclist.add(p[0][1])
+        p[0] = call(p[3], param_to_string(p[4][0]), p[4][1])
+        usedfunclist.add(p[0].get_uid())
     else:
-        if p[7][1] != int(p[7][1]):
+        if p[7].is_not_int():
             raise Exception("Line numbers should be integers")
-        if p[3][0] == 'VAR':
-            checktype(p[3][1], 'scalar')
-            p[0] = ['IF', p[3], int(p[7][1])]
-        else:
-            p[0] = ['IF', p[3][1], int(p[7][1])]
-    # print(lno,p[0])
+        if p[3].is_elem_type(elem_types.VAR):
+            checktype(p[3], 'scalar')
+        p[0] = cond(p[3], p[7])
+
     global alno
     alno += 1
     statements.append(p[0])
@@ -253,11 +258,6 @@ def p_stmt_nl(p):
     for _ in range(p[1]):
         lnomap.append(alno)
 
-# def p_stmt_nl(p):
-#     r'stmtnl : nl'
-#     for _ in range(p[1]):
-#         lnomap.append(alno)
-
 def p_funcbody(p):
     '''funcbody : stmt
                 | funcbody stmtnl stmt'''
@@ -268,10 +268,10 @@ def p_arg_list(p):
     '''arglist : VARNAME
                | arglist space "," space VARNAME'''
     if len(p) == 2:
-        p[0] = [[checkvar(p[1][1])], [p[1][1]]]
+        p[0] = [[checkvar(p[1])], [p[1]]]
     else:
-        p[1][0].append(checkvar(p[5][1]))
-        p[1][1].append(p[5][1])
+        p[1][0].append(checkvar(p[5]))
+        p[1][1].append(p[5])
         p[0] = p[1]
 
 def p_func_args(p):
@@ -286,15 +286,18 @@ def p_param_list(p):
     '''paramlist : VARNAME SPACES VARNAME
                  | paramlist space "," space VARNAME SPACES VARNAME'''
     if len(p) == 4:
-        p[0] = [[p[1][1]], {p[3][1]:p[1][1]}, {p[3][1]}, [p[3][1]]]
-    elif p[7][1] not in p[1][2]:
-        p[1][1][p[7][1]] = p[5][1]
-        p[1][2].add(p[7][1])
-        p[1][0].append(p[5][1])
-        p[1][3].append(p[7][1])
+        varName = p[3].get_display_value()
+        varType = p[1].get_display_value()
+        p[0] = [[varType], {varName:varType}, [varName]]
+    elif p[7].get_display_value() not in p[1][2]:
+        varName = p[7].get_display_value()
+        varType = p[5].get_display_value()
+        p[1][0].append(varType)
+        p[1][1][varName] = varType
+        p[1][2].append(varName)
         p[0] = p[1]
     else:
-        raise Exception("Same variable ("+p[7]+") occurs mulltiple times in Function Parameter List at line number "+str(lno))
+        raise Exception("Same variable ("+p[7].get_display_value()+") occurs mulltiple times in Function Parameter List at line number "+str(lno))
 
 def p_func_params(p):
     '''funcparams : "(" space ")"
@@ -302,7 +305,7 @@ def p_func_params(p):
     if len(p) == 4:
         p[0] = [[], []]
     else:
-        p[0] = [p[3][0], p[3][3]]
+        p[0] = [p[3][0], p[3][2]]
         vardict.update(p[3][1])
         varlist.update(p[3][2])
     global flno
@@ -313,11 +316,11 @@ def p_func(p):
             | func nl VARNAME funcparams spnl "{" spnl funcbody spnl "}"
             | func nl VARNAME funcparams spnl "{" spnl "}"'''
     if len(p) != 3:
-        p[3][1] = p[3][1]+param_to_string(p[4][0])
-        if p[3][1] in deffunclist:
-            raise Exception("Redeclaration of function '"+p[3][1]+"' at line number "+str(flno))
-        deffunclist.add(p[3][1])
-        funcdict[p[3][1]] = [p[4][1], vardict, clean_statements()]
+        func_uid = p[3].get_display_value()+param_to_string(p[4][0])
+        if func_uid in deffunclist:
+            raise Exception("Redeclaration of function '"+func_uid+"' at line number "+str(flno))
+        deffunclist.add(func_uid)
+        funcdict[func_uid] = [p[4][1], vardict.copy(), clean_statements()]
     elif usedstructlist - defstructlist:
         raise Exception("Structure/s " + str(usedstructlist - defstructlist) + " used without definition")
     prepare_next_function()
@@ -334,12 +337,13 @@ def p_list(p):
     '''list : VARNAME space
             | list "," space VARNAME space'''
     if len(p) == 3:
-        p[0] = {p[1][1]}
+        p[0] = {p[1].get_display_value()}
     else:
         p[0] = p[1]
-        if p[4][1] in p[0]:
-            raise Exception("Duplicate variable or field "+p[4][1]+" at line number "+str(lno))
-        p[0].add(p[4][1])
+        varName = p[4].get_display_value()
+        if varName in p[0]:
+            raise Exception("Duplicate variable or field "+varName+" at line number "+str(lno))
+        p[0].add(varName)
 
 def p_dec_list(p):
     '''declist : VARNAME SPACES list
@@ -347,13 +351,13 @@ def p_dec_list(p):
                | declist nl VARNAME SPACES list
                | declist nl VARNAME STARS SPACES list'''
     if len(p) < 6:
-        elemtype = p[1][1]
+        elemtype = p[1].get_display_value()
         elemdict = {}
         elemlist = set()
         global flno
         flno = lno
     else:
-        elemtype = p[3][1]
+        elemtype = p[3].get_display_value()
         elemdict = p[1][0]
         elemlist = p[1][1]
     usedstructlist.add(elemtype)
@@ -374,15 +378,17 @@ def p_structs(p):
               | structs VARNAME space "{" spnl declist spnl "}" nl
               | structs VARNAME space "{" spnl "}" nl'''
     if len(p) == 10:
-        if p[2][1] in defstructlist:
-            raise Exception("Redectaration of structure '"+p[2][1]+"' at line number "+str(flno - p[5]))
-        structdict[p[2][1]] = p[6]
-        defstructlist.add(p[2][1])
+        structName = p[2].get_display_value()
+        if structName in defstructlist:
+            raise Exception("Redectaration of structure '"+structName+"' at line number "+str(flno - p[5]))
+        structdict[structName] = p[6]
+        defstructlist.add(structName)
     elif len(p) == 8:
-        if p[2][1] in defstructlist:
-            raise Exception("Redectaration of structure '"+p[2][1]+"' at line number "+str(lno - p[5] - p[7]))
-        structdict[p[2][1]] = [{}, set()]
-        defstructlist.add(p[2][1])
+        structName = p[2].get_display_value()
+        if structName in defstructlist:
+            raise Exception("Redectaration of structure '"+structName+"' at line number "+str(lno - p[5] - p[7]))
+        structdict[structName] = [{}, set()]
+        defstructlist.add(structName)
 
 def p_prog(p):
     '''prog : structs func tac spnl'''
@@ -406,7 +412,6 @@ def reset():
     lno = 1
     alno = 1
 
-    # Used for error checking
     defstructlist.clear()
     defstructlist.add('scalar')
     usedstructlist.clear()
@@ -414,20 +419,17 @@ def reset():
     funcdict.clear()
     usedfunclist.clear()
 
-    # Used for error checking
     varlist.clear()
     structdict.clear()
     structdict['scalar'] = [{},set()]
-    # Saved for each function
+
     vardict.clear()
 
 def parse_file(file_name):
     try:
-        # s = input('tac > ')
         f = open(file_name, 'r')
         s = f.read()
     except EOFError:
-        # return ({}, {'main' : 'error'})
         return ("Error while loading the file", {'main' : 'error'})
     
     return parse_text(s)
@@ -439,13 +441,21 @@ def parse_text(s):
         parser.restart()
         funcdict['main'] = [[], vardict, clean_statements()]
     except Exception as X:
-        # print(X)
-        # return ({}, {'main' : 'error'})
         return (str(X), {'main' : 'error'})
     
     if usedfunclist - deffunclist:
-        # print("Function/s " + str(usedfunclist - deffunclist) + " used without definition")
-        # return ({}, {'main' : 'error'})
         return ("Function/s " + str(usedfunclist - deffunclist) + " used without definition", {'main' : 'error'})
-    # type: ignore
     return (structdict, funcdict)
+
+
+if __name__ == "__main__":
+    structdict, funcdict = parse_file("test3.txt")
+    print("structdict")
+    print(structdict)
+    print("Stmts")
+    for key, val in funcdict.items():
+        print(key)
+        print(val[0])
+        print(val[1])
+        for stmt in val[2]:
+            print("\t", stmt.get_display_stmt())

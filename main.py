@@ -54,6 +54,6 @@ def perform_analysis(file_name):
         perform_lfcpa(struct_dict, func_dict['main'][1], func_dict['main'][2], results_dir+'/lfcpa/')
 
 if __name__ == '__main__':
-    file_name = "test.txt"
+    file_name = "test2.txt"
     with open(file_name) as f:
         perform_analysis(f.read())

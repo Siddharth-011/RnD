@@ -1,7 +1,8 @@
 from helper import *
 from copy import deepcopy
+from stmt_helper import *
 
-def get_fspta_stmts(struct_dict, stmt_lst, lb = False):
+def get_fspta_stmts(struct_dict, stmt_lst:list[stmt], lb = False):
     new_stmt_lst = [stmt_lst[0]]
 
     counter_lst = [None]*(len(stmt_lst)+1)
@@ -14,36 +15,40 @@ def get_fspta_stmts(struct_dict, stmt_lst, lb = False):
     counter_to_stmt = {0:0}
     stmt_to_counter = {0:0}
     for stmt in stmt_lst[1:-1]:
-        match stmt[0]:
-            case 'ASG':
-                check = contains_pointer(stmt[1][0], struct_dict)
-                lhs = stmt[1][1]
-                rhs = stmt[2][1]
-                if check or (lb and ((lhs[0] == 'FLP') or (rhs[0] in ['FLP', 'PTR']))):
+        match stmt.stmtType:
+            case stmt_types.ASG:
+                check = contains_pointer(stmt.get_type(), struct_dict)
+                lhs = stmt.get_lhs()
+                rhs = stmt.get_rhs()
+                if check or (lb and (lhs.is_elem_type(elem_types.FLP) or (rhs.elemType in [elem_types.FLP, elem_types.PTR]))):
                     # if lb:
                     #     new_stmt_lst.append(['ASG', lhs, rhs, check])
                     # else:
                     #     new_stmt_lst.append(['ASG', lhs, rhs])
-                    new_stmt_lst.append(['ASG', lhs, rhs, check])
+                    # new_stmt_lst.append(['ASG', lhs, rhs, check]) #TODO
+                    stmt.containsPointer = check
+                    new_stmt_lst.append(stmt)
                     
                     counter_lst[counter] = counter
                     counter_to_stmt[counter] = new_stmt_counter
                     stmt_to_counter[new_stmt_counter] = counter
                     new_stmt_counter += 1
-            case 'GOT':
-                if counter == stmt[1]:
+            case stmt_types.GOT:
+                if counter == stmt.get_lno():
                     counter_lst[counter] = -1
                 else:
-                    counter_lst[counter] = stmt[1]
-            case 'IF':
-                new_stmt_lst.append(['IF', stmt[1], stmt[2]])
+                    counter_lst[counter] = stmt.get_lno()
+            case stmt_types.IF:
+                new_stmt_lst.append(stmt)
                 counter_lst[counter] = counter
                 counter_to_stmt[counter] = new_stmt_counter
                 stmt_to_counter[new_stmt_counter] = counter
                 new_stmt_counter += 1
-            case 'USE':
-                if lb and (stmt[1][0][-1] == '*'):
-                    new_stmt_lst.append(['USE', stmt[1][1]])
+            case stmt_types.USE:
+                # if lb and (stmt[1][0][-1] == '*'):
+                if lb:
+                    # new_stmt_lst.append(['USE', stmt[1][1]])
+                    new_stmt_lst.append(stmt)
                     counter_lst[counter] = counter
                     counter_to_stmt[counter] = new_stmt_counter
                     stmt_to_counter[new_stmt_counter] = counter
@@ -54,7 +59,7 @@ def get_fspta_stmts(struct_dict, stmt_lst, lb = False):
     counter_to_stmt[counter] = new_stmt_counter
     stmt_to_counter[new_stmt_counter] = counter
 
-    new_stmt_lst.append(['loop'])
+    new_stmt_lst.append(plain_text('loop'))
     counter_to_stmt[counter + 1] = new_stmt_counter + 1
     stmt_to_counter[new_stmt_counter + 1] = counter + 1
 
@@ -63,9 +68,9 @@ def get_fspta_stmts(struct_dict, stmt_lst, lb = False):
     predecessors = [[] for _ in range(len(new_stmt_lst))]
     new_stmt_counter = 0
     for stmt in new_stmt_lst[0:-2]:
-        if stmt[0] == 'IF':
+        if stmt.stmtType == stmt_types.IF:
             succ1 = counter_to_stmt[get_next_counter(stmt_to_counter[new_stmt_counter]+1, counter_lst)]
-            succ2 = counter_to_stmt[get_next_counter(stmt[2], counter_lst)]
+            succ2 = counter_to_stmt[get_next_counter(stmt.get_lno(), counter_lst)]
             successors[new_stmt_counter] = [succ1, succ2]
             predecessors[succ1].append(new_stmt_counter)
             predecessors[succ2].append(new_stmt_counter)
@@ -80,113 +85,109 @@ def get_fspta_stmts(struct_dict, stmt_lst, lb = False):
         predecessors.pop()
         successors.pop()
 
-    #TODO (Print)
-    # get_stmt_graph(new_stmt_lst, successors)
-
     return (new_stmt_lst, successors, predecessors)
 
-def get_pta_stmts(struct_dict, stmt_lst):
+def get_pta_stmts(struct_dict, stmt_lst:list[stmt]):
     new_stmt_lst = []
-    for stmt in stmt_lst:
-        if stmt[0] == 'ASG':
-            if contains_pointer(stmt[1][0], struct_dict):
-                new_stmt_lst.append([stmt[1][1], stmt[2][1]])
+    for stmt in stmt_lst[1:-1]:
+        if stmt.is_stmt_type(stmt_types.ASG):
+            if contains_pointer(stmt.get_type(), struct_dict):
+                new_stmt_lst.append(stmt)
     return new_stmt_lst
 
-def get_defs(ptr_dict, lhs):
+def get_defs(ptr_dict:PointerDict, lhs:variable|field):
     vars = []
     fld = ''
-    match lhs[0]:
-        case 'VAR':
-            vars.append(lhs[1])
+    match lhs.elemType:
+        case elem_types.VAR:
+            vars.append(lhs.varName)
             fld = '*'
-        case 'PTR':
-            for var in (ptr_dict[lhs[1]]['*'] - {'?'}):
+        case elem_types.PTR:
+            for var in (ptr_dict[lhs.varName]['*'] - {'?'}):
                 vars.append(var)
             fld = '*'
-        case 'FLP':
-            for var in (ptr_dict[lhs[1]]['*'] - {'?'}):
+        case elem_types.FLP:
+            for var in (ptr_dict[lhs.varName]['*'] - {'?'}):
                 vars.append(var)
-            fld = lhs[2]
-        case 'FLD':
-            vars.append(lhs[1])
-            fld = lhs[2]
+            fld = lhs.fld
+        case elem_types.FLD:
+            vars.append(lhs.varName)
+            fld = lhs.fld
     return (vars, fld)
 
-def get_pointees(ptr_dict, rhs):
+def get_pointees(ptr_dict:PointerDict, rhs:variable|field):
     pointees = set()
-    match rhs[0]:
-        case 'ADR':
-            pointees.add(rhs[1])
-        case 'VAR':
-            for var in ptr_dict[rhs[1]]['*']:
+    match rhs.elemType:
+        case elem_types.ADR:
+            pointees.add(rhs.varName)
+        case elem_types.VAR:
+            for var in ptr_dict[rhs.varName]['*']:
                 pointees.add(var)
-        case 'PTR':
-            for q in ptr_dict[rhs[1]]['*']:
+        case elem_types.PTR:
+            for q in ptr_dict[rhs.varName]['*']:
                 if q == '?':
                     pointees.add('?')
                 else:
                     for var in ptr_dict[q]['*']:
                         pointees.add(var)
-        case 'FLP':
-            fld = rhs[2]
-            for a in ptr_dict[rhs[1]]['*']:
-                if a == '?':
+        case elem_types.FLP:
+            fld = rhs.fld
+            for var1 in ptr_dict[rhs.varName]['*']:
+                if var1 == '?':
                     pointees.add('?')
                 else:
-                    for var in ptr_dict[a][fld]:
-                        pointees.add(var)
-        case 'FLD':
-            for var in ptr_dict[rhs[1]][rhs[2]]:
+                    for var2 in ptr_dict[var1][fld]:
+                        pointees.add(var2)
+        case elem_types.FLD:
+            for var in ptr_dict[rhs.varName][rhs.fld]:
                 pointees.add(var)
-        case 'MAL':
-            pointees.add(rhs[1])
+        case elem_types.MAL:
+            pointees.add(rhs.varName)
     return pointees
 
-def get_pointee(ptr_dict, rhs, var_to_set_dict):
+def get_pointee(ptr_dict:PointerDict, rhs:variable|field, var_to_set_dict):
     pointee = None
-    rhs_var = var_to_set_dict[rhs[1]]
-    match rhs[0]:
-        case 'ADR':
-            # pointees.add(rhs[1])
+    rhs_var = var_to_set_dict[rhs.varName]
+    match rhs.elemType:
+        case elem_types.ADR:
             pointee = rhs_var
-        case 'VAR':
+        case elem_types.VAR:
             pointee = var_to_set_dict[ptr_dict[rhs_var]['*']]
-        case 'PTR':
+        case elem_types.PTR:
             pointee = ptr_dict[rhs_var]['*']
             if pointee != None:
                 pointee = var_to_set_dict[ptr_dict[var_to_set_dict[pointee]]['*']]
-        case 'FLP':
+        case elem_types.FLP:
             pointee = ptr_dict[rhs_var]['*']
             if pointee != None:
-                fld = rhs[2]
+                fld = rhs.fld
                 pointee = var_to_set_dict[ptr_dict[var_to_set_dict[pointee]][fld]]
-        case 'FLD':
-            pointee = var_to_set_dict[ptr_dict[rhs_var][rhs[2]]]
-        case 'MAL':
+        case elem_types.FLD:
+            pointee = var_to_set_dict[ptr_dict[rhs_var][rhs.fld]]
+        case elem_types.MAL:
             pointee = rhs_var
     return pointee
 
-def get_def(ptr_dict, lhs, var_to_set_dict):
+def get_def(ptr_dict:PointerDict, lhs:variable|field, var_to_set_dict):
     var = None
     fld = ''
-    lhs_var = var_to_set_dict[lhs[1]]
-    match lhs[0]:
-        case 'VAR':
+    lhs_var = var_to_set_dict[lhs.varName]
+    match lhs.elemType:
+        case elem_types.VAR:
             var = lhs_var
             fld = '*'
-        case 'PTR':
+        case elem_types.PTR:
             var = var_to_set_dict[ptr_dict[lhs_var]['*']]
             fld = '*'
-        case 'FLP':
+        case elem_types.FLP:
             var = var_to_set_dict[ptr_dict[lhs_var]['*']]
-            fld = lhs[2]
-        case 'FLD':
+            fld = lhs.fld
+        case elem_types.FLD:
             var = lhs_var
-            fld = lhs[2]
+            fld = lhs.fld
     return (var, fld)
 
-def set_ptr_dict(var_dict, struct_dict, ptr_dict, enable_unk = True):
+def set_ptr_dict(var_dict, struct_dict, ptr_dict:PointerDict, enable_unk = True):
     int_set = set()
     if enable_unk:
         int_set.add('?')
@@ -201,14 +202,12 @@ def set_ptr_dict(var_dict, struct_dict, ptr_dict, enable_unk = True):
                 for field in struct_dict[typ][0].keys():
                     ptr_dict[var][field] = int_set.copy()
 
-def unify(ptr_dict, sets_to_unify, var_to_set_dict, set_to_var_dict):
+def unify(ptr_dict:PointerDict, sets_to_unify, var_to_set_dict, set_to_var_dict):
     if sets_to_unify[0] == sets_to_unify[1]:
         return False
     else:
-        # print(sets_to_unify)
         new_set = sets_to_unify[0]
         unified_set = sets_to_unify[1]
-        # print(new_set)
 
         set_to_var_dict[new_set].extend(set_to_var_dict.pop(unified_set))
 
@@ -242,8 +241,8 @@ def unify(ptr_dict, sets_to_unify, var_to_set_dict, set_to_var_dict):
 
         return change
 
-def get_must_pt(ptr_dict, p, f):
-    ptrs = ptr_dict[p][f]
+def get_must_pt(ptr_dict:PointerDict, ptr:str, fld:str):
+    ptrs = ptr_dict[ptr][fld]
     if len(ptrs) > 1:
         return []
     elif len(ptrs) == 1 and '?' not in ptrs:
@@ -251,37 +250,32 @@ def get_must_pt(ptr_dict, p, f):
     else:
         return ['$all']
 
-def get_strong_update(ptr_dict, lhs):
+def get_strong_update(ptr_dict:PointerDict, lhs:variable|field):
     vars = []
     fld = ''
 
-    match lhs[0]:
-        case 'VAR':
-            vars.append(lhs[1])
+    match lhs.elemType:
+        case elem_types.VAR:
+            vars.append(lhs.varName)
             fld = '*'
-        case 'PTR':
-            # for var in ptr_dict[lhs[1]]['*']:
-            #     vars.append(var)
-            vars.extend(get_must_pt(ptr_dict, lhs[1], '*'))
+        case elem_types.PTR:
+            vars.extend(get_must_pt(ptr_dict, lhs.varName, '*'))
             fld = '*'
-        case 'FLP':
-            # for var in ptr_dict[lhs[1]]['*']:
-            #     vars.append(var)
-            vars.extend(get_must_pt(ptr_dict, lhs[1], '*'))
-            fld = lhs[2]
-        case 'FLD':
-            vars.append(lhs[1])
-            fld = lhs[2]
+        case elem_types.FLP:
+            vars.extend(get_must_pt(ptr_dict, lhs.varName, '*'))
+            fld = lhs.fld
+        case elem_types.FLD:
+            vars.append(lhs.varName)
+            fld = lhs.fld
     return (vars, fld)
-#TODO
-def set_pin(ptr_dict_in, ptr_dicts):
+
+def set_pin(ptr_dict_in:PointerDict, ptr_dicts:list[PointerDict]):
     for ptr in ptr_dict_in.keys():
         for fld in ptr_dict_in[ptr].keys():
-            ptr_dict_in[ptr][fld].clear()
             for ptr_dict in ptr_dicts:
                 ptr_dict_in[ptr][fld].update(ptr_dict[ptr][fld])
 
-def set_lb_pin(ptr_dict_in, ptr_dicts, liveness_dict):
+def set_lb_pin(ptr_dict_in:PointerDict, ptr_dicts:PointerDict, liveness_dict:LivenessDict):
     for ptr, ptr_dict in ptr_dict_in.items():
         for fld, fld_dict in ptr_dict.items():
             fld_dict.clear()
@@ -290,12 +284,12 @@ def set_lb_pin(ptr_dict_in, ptr_dicts, liveness_dict):
             for ptr_dict in ptr_dicts:
                 fld_dict.update(ptr_dict[ptr][fld])
 
-def set_pout(ptr_dict_out, stmt):
-    if stmt[0] != 'ASG':# or not stmt[3]:
+def set_pout(ptr_dict_out:PointerDict, stmt:assignment):
+    if not stmt.is_stmt_type(stmt_types.ASG):
         return
     
-    lhs = stmt[1]
-    rhs = stmt[2]
+    lhs = stmt.get_lhs()
+    rhs = stmt.get_rhs()
 
     pointees = get_pointees(ptr_dict_out, rhs)
     vars, fld = get_defs(ptr_dict_out, lhs)
@@ -312,19 +306,18 @@ def set_pout(ptr_dict_out, stmt):
     for var in vars:
         ptr_dict_out[var][fld].update(pointees)
 
-def set_lb_pout(ptr_dict_out, stmt, liveness_dict, ptr_dict_in):
-    # ptr_dict_out.clear()
+def set_lb_pout(ptr_dict_out:PointerDict, stmt:stmt|assignment, liveness_dict:LivenessDict, ptr_dict_in:PointerDict):
     ptr_dict_out |= deepcopy(ptr_dict_in)
     for ptr, ptr_dict in ptr_dict_out.items():
         for fld, pti in ptr_dict.items():
             if ptr not in liveness_dict[fld]:
                 pti.clear()
 
-    if stmt[0] != 'ASG' or not stmt[3]:
+    if (not stmt.is_stmt_type(stmt_types.ASG)) or not stmt.containsPointer:
         return
     
-    lhs = stmt[1]
-    rhs = stmt[2]
+    lhs = stmt.get_lhs()
+    rhs = stmt.get_rhs()
 
     pointees = get_pointees(ptr_dict_in, rhs)
     vars, fld = get_defs(ptr_dict_in, lhs)
@@ -342,47 +335,41 @@ def set_lb_pout(ptr_dict_out, stmt, liveness_dict, ptr_dict_in):
     for var in liveness_dict[fld].intersection(vars):
         ptr_dict_out[var][fld].update(pointees)
 
-def set_lhsref(lhsref, lhs, check = False):
-    if lhs[0] in ['PTR', 'FLP']:
-        lhsref['*'] = [lhs[1]]
+def set_lhsref(lhsref, lhs:variable|field, check = False):
+    if lhs.elemType in [elem_types.PTR, elem_types.FLP]:
+        lhsref['*'] = [lhs.varName]
     elif check:
         lhsref['*'] = []
 
-def set_lhsrhsref(ref, stmt, ptr_dict):
-    set_lhsref(ref, stmt[1], True)
-    rhs = stmt[2]
-    check = stmt[3]
-    match rhs[0]:
-        case 'VAR':
-            ref['*'].append(rhs[1])
-        case 'PTR':
-            ref['*'].append(rhs[1])
+def set_lhsrhsref(ref, stmt:assignment, ptr_dict:PointerDict):
+    set_lhsref(ref, stmt.get_lhs(), True)
+    rhs = stmt.get_rhs()
+    check = stmt.containsPointer
+    match rhs.elemType:
+        case elem_types.VAR:
+            ref['*'].append(rhs.varName)
+        case elem_types.PTR:
+            ref['*'].append(rhs.varName)
             if check:
-                ref['*'].extend(ptr_dict[rhs[1]]['*'])
-                # for q in ptr_dict[rhs[1]]['*']:
-                #     ref['*'].append(q)
-        case 'FLP':
-            ref['*'].append(rhs[1])
+                ref['*'].extend(ptr_dict[rhs.varName]['*'])
+        case elem_types.FLP:
+            ref['*'].append(rhs.varName)
             if check:
-                fld = rhs[2]
-                qs = ptr_dict[rhs[1]][fld]
+                fld = rhs.fld
+                qs = ptr_dict[rhs.varName][fld]
                 if len(qs) != 0:
                     ref[fld] = []
                     ref[fld].extend(qs)
-                    # for q in qs:
-                        # ref[fld].append(q)
-        case 'FLD':
-            ref[rhs[2]] = [rhs[1]]
+        case elem_types.FLD:
+            ref[rhs.fld] = [rhs.varName]
             if len(ref['*']) == 0:
                 del ref['*']
 
-def get_ref(stmt, ptr_dict, liveness_dict):
+def get_ref(stmt:stmt|assignment|use, ptr_dict:PointerDict, liveness_dict:LivenessDict):
     ref = {}
-    if stmt[0] == 'ASG':
-        lhs = stmt[1]
+    if stmt.is_stmt_type(stmt_types.ASG):
+        lhs = stmt.get_lhs()
         vars, fld = get_defs(ptr_dict, lhs)
-
-        # print('Defn', fld, vars)
         
         if liveness_dict[fld].isdisjoint(vars):
             if sum(len(x) for x in liveness_dict.values()) != 0:
@@ -390,25 +377,18 @@ def get_ref(stmt, ptr_dict, liveness_dict):
         else:
             set_lhsrhsref(ref, stmt, ptr_dict)
 
-    elif stmt[0] == 'USE':
-        ref['*'] = [stmt[1]]
+    elif stmt.is_stmt_type(stmt_types.USE):
+        ref['*'] = [stmt.varName]
 
     return ref
 
-def set_lin(liveness_dict_in:dict, stmt, ptr_dict, liveness_dict_out):
+def set_lin(liveness_dict_in:LivenessDict, stmt:stmt|assignment|use, ptr_dict:PointerDict, liveness_dict_out:LivenessDict):
     ref = get_ref(stmt, ptr_dict, liveness_dict_out)
-
-    # print('Data')
-    # print(ptr_dict)
-    # print(ref)
     
     liveness_dict_in |= deepcopy(liveness_dict_out)
-    # set_lout(liveness_dict_in, [liveness_dict_out])
 
-    if (stmt[0] == 'ASG') and stmt[3]:
-        vars, fld = get_strong_update(ptr_dict, stmt[1])
-
-        # print(fld, vars)
+    if stmt.is_stmt_type(stmt_types.ASG) and stmt.containsPointer:
+        vars, fld = get_strong_update(ptr_dict, stmt.get_lhs())
 
         if vars == ['$all']:
             liveness_dict_in[fld].clear()
@@ -418,11 +398,7 @@ def set_lin(liveness_dict_in:dict, stmt, ptr_dict, liveness_dict_out):
     for fld, vars in ref.items():
         liveness_dict_in[fld].update(vars)
 
-    # print('Liveness')
-    # print(liveness_dict_out)
-    # print(liveness_dict_in)
-
-def set_lout(liveness_dict_out, liveness_dicts):
+def set_lout(liveness_dict_out:LivenessDict, liveness_dicts:LivenessDict):
     for fld, fld_dict in liveness_dict_out.items():
         fld_dict.clear()
         for liveness_dict in liveness_dicts:
