@@ -2,7 +2,7 @@ from helper import *
 from copy import deepcopy
 from stmt_helper import *
 
-def get_fspta_stmts(struct_dict, stmt_lst:list[stmt], lb = False):
+def get_fspta_stmts(struct_dict, stmt_lst:list[stmt], lb = False, vasco = False):
     new_stmt_lst = [stmt_lst[0]]
 
     counter_lst = [None]*(len(stmt_lst)+1)
@@ -48,6 +48,13 @@ def get_fspta_stmts(struct_dict, stmt_lst:list[stmt], lb = False):
                 # if lb and (stmt[1][0][-1] == '*'):
                 if lb:
                     # new_stmt_lst.append(['USE', stmt[1][1]])
+                    new_stmt_lst.append(stmt)
+                    counter_lst[counter] = counter
+                    counter_to_stmt[counter] = new_stmt_counter
+                    stmt_to_counter[new_stmt_counter] = counter
+                    new_stmt_counter += 1
+            case stmt_types.CAL:
+                if vasco:
                     new_stmt_lst.append(stmt)
                     counter_lst[counter] = counter
                     counter_to_stmt[counter] = new_stmt_counter

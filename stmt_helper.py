@@ -25,6 +25,9 @@ class stmt:
 
     def is_stmt_type(self, stmtType:int) -> bool:
         return stmtType == self.stmtType
+    
+    def add_funcID(self, id:str) -> None:
+        print("Called add_funcID from the base class")
 
 
 class elem:
@@ -39,6 +42,9 @@ class elem:
     
     def elem_type(self) -> int:
         return self.elemType
+    
+    def add_funcID(self, id:str) -> None:
+        print("Called add_funcID from the base class")
 
 class number(elem):
     def __init__(self, num:float) -> None:
@@ -56,6 +62,9 @@ class number(elem):
     
     def is_not_int(self) -> bool:
         return self.not_int
+    
+    def add_funcID(self, id:str) -> None:
+        pass
 
 class variable(elem):
     def __init__(self, varName:str) -> None:
@@ -64,6 +73,9 @@ class variable(elem):
         
     def get_display_value(self) -> str:
         return self.varName
+    
+    def add_funcID(self, id:str) -> None:
+        self.varName = self.varName+id
 
 #TODO
 class boolExp(elem):
@@ -75,36 +87,39 @@ class boolExp(elem):
         
     def get_display_value(self) -> str:
         return self.var1.get_display_value()+' '+self.op+' '+self.var2.get_display_value()
+    
+    def add_funcID(self, id:str) -> None:
+        self.var1.add_funcID(id)
+        self.var2.add_funcID(id)
 
-class pointer(elem):
+class pointer(variable):
     def __init__(self, var:variable) -> None:
-        self.varName = var.varName
+        variable.__init__(self, var.varName)
         self.elemType = elem_types.PTR
         
     def get_display_value(self) -> str:
         return '*'+self.varName
 
-class field(elem):
+class field(variable):
     def __init__(self, var:variable, fld:variable) -> None:
-        self.varName = var.varName
+        variable.__init__(self, var.varName)
         self.fld = fld.varName
         self.elemType = elem_types.FLD
         
     def get_display_value(self) -> str:
         return self.varName+'.'+self.fld
 
-class fieldPointer(elem):
+class fieldPointer(field):
     def __init__(self, var:variable, fld:variable) -> None:
-        self.varName = var.varName
-        self.fld = fld.varName
+        field.__init__(self, var, fld)
         self.elemType = elem_types.FLP
         
     def get_display_value(self) -> str:
         return self.varName+'->'+self.fld
 
-class address(elem):
+class address(variable):
     def __init__(self, var:variable) -> None:
-        self.varName = var.varName
+        variable.__init__(self, var.varName)
         self.elemType = elem_types.ADR
         
     def get_display_value(self) -> str:
@@ -126,6 +141,9 @@ class plain_text(stmt):
 
     def get_display_stmt(self) -> str:
         return self.txt
+    
+    def add_funcID(self, id:str) -> None:
+        pass
 
 class assignment(stmt):
     def __init__(self, lhs:elem, rhs:elem, type:str) -> None:
@@ -146,6 +164,10 @@ class assignment(stmt):
     
     def get_type(self) -> str:
         return self.type
+    
+    def add_funcID(self, id:str) -> None:
+        self.lhs.add_funcID(id)
+        self.rhs.add_funcID(id)
 
 class input(stmt):
     def __init__(self, var:variable) -> None:
@@ -154,6 +176,9 @@ class input(stmt):
 
     def get_display_stmt(self) -> str:
         return ('read '+self.var.get_display_value())
+    
+    def add_funcID(self, id:str) -> None:
+        self.var.add_funcID(id)
 
 class use(stmt):
     def __init__(self, var:variable) -> None:
@@ -162,6 +187,9 @@ class use(stmt):
 
     def get_display_stmt(self) -> str:
         return ('use '+self.varName)
+    
+    def add_funcID(self, id:str) -> None:
+        self.varName = self.varName+id
 
 class goto(stmt):
     def __init__(self, lno:number) -> None:
@@ -176,9 +204,12 @@ class goto(stmt):
     
     def set_lno(self, lno:int) -> None:
         self.lno = lno
+    
+    def add_funcID(self, id:str) -> None:
+        pass
 
 class call(stmt):
-    def __init__(self, funcName:variable, input_params:str, args) -> None:
+    def __init__(self, funcName:variable, input_params:str, args:list[variable]) -> None:
         self.funcName = funcName.get_display_value()
         self.input_params = input_params
         self.args = args
@@ -198,6 +229,10 @@ class call(stmt):
 
     def get_uid(self) -> str:
         return self.funcName+self.input_params
+    
+    def add_funcID(self, id:str) -> None:
+        for arg in self.args:
+            arg.add_funcID(id)
 
 class cond(stmt):
     def __init__(self, condition:variable|boolExp, lno:number) -> None:
@@ -213,3 +248,6 @@ class cond(stmt):
     
     def set_lno(self, lno:int) -> None:
         self.lno = lno
+    
+    def add_funcID(self, id:str) -> None:
+        self.cond.add_funcID(id)
