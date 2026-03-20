@@ -2,8 +2,8 @@ from parser import parse_text
 from fi_pta import perform_andersens_analysis, perform_steensgaards_analysis
 from fs_pta import perform_fspta
 from lfcpa  import perform_lfcpa
-from vasco_pta import get_updated_func_dict
-import os, shutil
+# from vasco_pta import get_updated_func_dict
+import os, shutil, sys
 
 
 def perform_analysis(file_name):
@@ -55,6 +55,11 @@ def perform_analysis(file_name):
         perform_lfcpa(struct_dict, func_dict['main'][1], func_dict['main'][2], results_dir+'/lfcpa/')
 
 if __name__ == '__main__':
-    file_name = "test.txt"
+    
+    if len(sys.argv)==2:
+        file_name = sys.argv[1]
+    else:
+        file_name = "test.txt"
+    
     with open(file_name) as f:
         perform_analysis(f.read())
